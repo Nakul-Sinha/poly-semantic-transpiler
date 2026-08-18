@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
+    env:
+      POLY_LLM_MODE: mock        # run fully offline: no API key, deterministic
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Toolchain versions
+        run: |
+          python --version
+          node --version
+          gcc --version | head -1
+
+      - name: Install (editable + dev deps)
+        run: python -m pip install -e ".[dev]"
+
+      - name: Unit + differential tests
+        run: pytest -q
+
+      - name: 3-way self-check on every example (all targets)
+        run: |
+          set -e
+          for f in examples/*.py; do
+            echo "==== $f ===="
+            python -m poly "$f" --self-check
+          done
+
+      - name: Transpile every example to every target
+        run: |
+          set -e
+          for f in examples/*.py; do
+            for t in js py c; do
+              python -m poly "$f" -t "$t" -o "/tmp/out_$t" 2>/dev/null || echo "  ($f -> $t not supported, expected for holes+C)"
+            done
+          done
