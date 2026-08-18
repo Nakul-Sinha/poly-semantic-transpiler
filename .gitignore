@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.venv/
+venv/
+
+# Poly hole cache (auto-populated at runtime; regenerated deterministically)
+poly/llm/cache/*.json
+
+# Scratch build artifacts
+/tmp/
+*.exe
+_t.c
+out_*
