@@ -6,10 +6,10 @@
   --ink-faint: rgba(28, 35, 51, 0.42);
   --glass-hi: rgba(255, 255, 255, 0.30);
   --glass-lo: rgba(255, 255, 255, 0.08);
-  --edge-1: rgba(15, 19, 30, 0.55);
-  --edge-2: rgba(15, 19, 30, 0.14);
-  --edge-3: rgba(15, 19, 30, 0.38);
-  --stroke: rgba(15, 19, 30, 0.26);
+  --edge-1: rgba(0, 0, 0, 0.42);
+  --edge-2: rgba(0, 0, 0, 0.10);
+  --edge-3: rgba(0, 0, 0, 0.28);
+  --stroke: rgba(0, 0, 0, 0.20);
   --shadow: 0 30px 70px rgba(23, 30, 52, 0.35), 0 6px 18px rgba(23, 30, 52, 0.18);
   --radius: 28px;
   --mono: "JetBrains Mono", Consolas, "Cascadia Mono", monospace;
@@ -80,8 +80,8 @@ body {
 
 /* ---- header row ---- */
 .tile-head {
-  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
-  padding: 9px 12px 7px 12px; cursor: grab;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 6px 10px 5px 10px; cursor: grab;
 }
 .tile-head:active { cursor: grabbing; }
 
@@ -108,7 +108,7 @@ body {
 .dd { position: relative; }
 .dd-trigger {
   display: flex; align-items: center; gap: 8px;
-  padding: 6px 12px 7px 12px; cursor: pointer;
+  padding: 5px 11px; cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
 }
 .dd-trigger:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.20)); }
@@ -124,7 +124,7 @@ body {
 .dd-menu {
   position: absolute; top: calc(100% + 7px); left: 0; z-index: 30;
   min-width: 100%; list-style: none; padding: 5px; display: none;
-  border-radius: 14px; border: 1px solid rgba(15, 19, 30, 0.30);
+  border-radius: 14px; border: 1px solid rgba(0, 0, 0, 0.22);
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.38));
   backdrop-filter: blur(28px) saturate(160%);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
@@ -139,7 +139,7 @@ body {
 .dd-menu li.on { background: rgba(28, 35, 51, 0.08); }
 
 /* buttons */
-.btn { padding: 8px 18px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease; }
+.btn { padding: 6px 16px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease; }
 .btn.primary {
   background: linear-gradient(180deg, rgba(36, 42, 60, 0.94), rgba(24, 29, 44, 0.92));
   color: #f4f6fb; border-color: rgba(255, 255, 255, 0.25);
@@ -152,7 +152,7 @@ body {
 .spacer { flex: 1; }
 
 /* api key field */
-.key { display: flex; align-items: center; gap: 7px; padding: 7px 12px; }
+.key { display: flex; align-items: center; gap: 7px; padding: 5px 11px; }
 .key svg { width: 14px; height: 14px; fill: var(--ink-faint); flex: none; }
 .key input {
   border: 0; outline: 0; background: transparent; color: var(--ink);
@@ -160,25 +160,25 @@ body {
   transition: width 0.25s ease;
 }
 .key input::placeholder { color: var(--ink-faint); }
-.key:focus-within { border-color: rgba(15, 19, 30, 0.45); }
+.key:focus-within { border-color: rgba(0, 0, 0, 0.35); }
 .key input:focus { width: 190px; }
 
 /* ---- panes: fully transparent glass insets ---- */
-.panes { flex: 1; display: flex; min-height: 0; padding: 0 9px 7px 9px; }
+.panes { flex: 1; display: flex; min-height: 0; padding: 0 8px 6px 8px; }
 
 .pane {
   flex: 1 1 0; min-width: 170px; display: flex; flex-direction: column; min-height: 0;
   border-radius: 15px;
   border: 1px solid var(--stroke);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);   /* 95% transparent */
   overflow: hidden;
 }
 #pane-src { flex: 0 0 50%; }
 
 .pane-bar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 13px 6px 13px;
-  border-bottom: 1px solid rgba(15, 19, 30, 0.16);
+  padding: 6px 12px 5px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 .pane-label {
   font-size: 9px; font-weight: 600; letter-spacing: 0.18em;
@@ -226,7 +226,7 @@ pre .skip { color: var(--warn); }
 /* ---- status bar ---- */
 .statusbar {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 5px 16px 8px 16px;
+  padding: 3px 14px 6px 14px;
   font-family: var(--mono); font-size: 10.5px; color: var(--ink);
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 1px 2px rgba(255, 255, 255, 0.35);
   /* light pools at the base of the glass so status text survives dark artwork */
