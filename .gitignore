@@ -20,4 +20,4 @@ out_*
 
 # Harness config and local background artwork (third-party image, not committed)
 .claude/
-web/static/bg.jpg
+web/static/bg.*

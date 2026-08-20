@@ -64,8 +64,9 @@ Run. Programs that use semantic holes go through the validated LLM layer
 live fills, the key stays in memory only). The Check button runs the 3-way
 differential self-check right in the output pane.
 
-The page looks for background artwork at `web/static/bg.jpg` (any large image
-works; a soft gradient is used if the file is absent).
+The page looks for background artwork at `web/static/bg.jpg` (also accepts
+.png, .jpeg or .webp under the name `bg`); a soft gradient is used until the
+file exists.
 
 Note: the self-check executes the submitted program with CPython as the
 reference oracle, so keep the server on localhost (the default).
