@@ -107,7 +107,136 @@ trackPointer(divider, () => {
   paneSrc.style.flexBasis = pct + "%";
 }, { onEnd: () => divider.classList.remove("active") });
 
-addEventListener("resize", () => { Object.assign(state, load() || {}); applyLayout(); });
+addEventListener("resize", () => {
+  if (vizOpen) { applySplit(); return; }
+  Object.assign(state, load() || {});
+  applyLayout();
+});
+
+/* ---------------- pipeline visualizer ---------------- */
+
+const viz = $("viz"), vizBody = $("vizbody"), vizBtn = $("vizbtn");
+let vizOpen = false;
+let savedRect = null;
+
+function setRect(el, r) {
+  Object.assign(el.style, { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px" });
+}
+
+function splitRects() {
+  const vw = innerWidth, vh = innerHeight, m = 36, gap = 14;
+  const inner = vw - m * 2 - gap;
+  const tw = Math.max(540, Math.round(inner * 0.46));
+  return {
+    tile: { x: m, y: m, w: tw, h: vh - m * 2 },
+    viz: { x: m + tw + gap, y: m, w: inner - tw, h: vh - m * 2 },
+  };
+}
+
+function applySplit() {
+  const r = splitRects();
+  setRect(tile, r.tile);
+  setRect(viz, r.viz);
+}
+
+function openViz() {
+  if (innerWidth < 1100) {
+    statusEl.textContent = "screen too narrow for the visualizer";
+    return;
+  }
+  const r = tile.getBoundingClientRect();
+  savedRect = { x: r.left, y: r.top, w: r.width, h: r.height };
+  vizOpen = true;
+  vizBtn.classList.add("on");
+  tile.classList.add("animating", "split");
+  applySplit();
+  viz.hidden = false;
+  void viz.offsetWidth;          // force reflow so the fade-in transition always runs
+  viz.classList.add("in");
+  runPipeline();
+}
+
+function closeViz() {
+  vizOpen = false;
+  vizBtn.classList.remove("on");
+  viz.classList.remove("in");
+  setTimeout(() => { viz.hidden = true; }, 250);
+  if (savedRect) setRect(tile, savedRect);
+  setTimeout(() => tile.classList.remove("animating", "split"), 500);
+}
+
+async function runPipeline() {
+  vizBody.innerHTML = '<div class="viz-msg">running the 6-stage pipeline on your code&hellip;</div>';
+  let r;
+  try {
+    r = await call("/api/pipeline", payload());
+  } catch {
+    vizBody.innerHTML = '<div class="viz-msg">server unreachable, is web/server.py running?</div>';
+    return;
+  }
+  renderPipeline(r);
+}
+
+function renderPipeline(r) {
+  vizBody.innerHTML = "";
+  if (!r.ok || !r.stages) {
+    vizBody.innerHTML = '<div class="viz-msg">pipeline failed to run</div>';
+    return;
+  }
+  const badge = { ok: "", error: "failed", blocked: "blocked" };
+  r.stages.forEach((s, i) => {
+    const card = document.createElement("div");
+    card.className = "stage" + (s.status === "error" ? " err" : s.status === "blocked" ? " blocked" : "");
+    card.style.animationDelay = (i * 130) + "ms";
+
+    const top = document.createElement("div");
+    top.className = "stage-top";
+    top.appendChild(line2("stage-num", "0" + (i + 1)));
+    top.appendChild(line2("stage-name", s.name));
+    if (badge[s.status]) top.appendChild(line2("stage-badge", badge[s.status]));
+    top.appendChild(line2("stage-ms", s.status === "ok" ? s.ms + " ms" : ""));
+    card.appendChild(top);
+
+    const pre = document.createElement("pre");
+    pre.textContent = s.detail;
+    card.appendChild(pre);
+
+    if (s.note) {
+      const note = document.createElement("div");
+      note.className = "stage-note";
+      note.textContent = s.note;
+      card.appendChild(note);
+    }
+    vizBody.appendChild(card);
+    if (i < r.stages.length - 1) {
+      const arrow = document.createElement("div");
+      arrow.className = "stage-arrow";
+      arrow.textContent = "↓";
+      arrow.style.animationDelay = (i * 130 + 65) + "ms";
+      vizBody.appendChild(arrow);
+    }
+  });
+  if (!r.narrated) {
+    const hint = document.createElement("div");
+    hint.className = "viz-hint";
+    hint.textContent = keyEl.value.trim()
+      ? "AI narration unavailable for this run"
+      : "paste an API key in the header for an AI narration of each stage";
+    vizBody.appendChild(hint);
+  }
+}
+
+function line2(cls, text) {
+  const el = document.createElement("span");
+  el.className = cls;
+  el.textContent = text;
+  return el;
+}
+
+vizBtn.addEventListener("click", () => (vizOpen ? closeViz() : openViz()));
+$("vizclose").addEventListener("click", closeViz);
+$("vizrefresh").addEventListener("click", runPipeline);
+addEventListener("keydown", (e) => { if (e.key === "Escape" && vizOpen) closeViz(); });
 
 /* ---------------- dropdowns ---------------- */
 

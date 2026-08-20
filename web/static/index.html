@@ -17,6 +17,13 @@
 <section class="tile" id="tile" role="application" aria-label="Poly transpiler terminal">
   <div class="tile-head" id="tilehead">
     <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <button class="mini-ic" id="vizbtn" type="button" title="Visualize the 6 compiler stages on this code">
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <rect x="2" y="1.5" width="12" height="3" rx="1.5"/>
+        <rect x="2" y="6.5" width="12" height="3" rx="1.5"/>
+        <rect x="2" y="11.5" width="12" height="3" rx="1.5"/>
+      </svg>
+    </button>
 
     <div class="dd" id="dd-source">
       <button class="dd-trigger" type="button" aria-haspopup="listbox">
@@ -76,6 +83,25 @@
   </div>
 
   <div class="grip" id="grip" title="Drag to resize" aria-hidden="true"></div>
+</section>
+
+<section class="tile viz" id="viz" hidden aria-label="Compiler pipeline visualization">
+  <div class="tile-head viz-head">
+    <span class="viz-title">pipeline &middot; 6 stages</span>
+    <span class="spacer"></span>
+    <button class="mini-ic" id="vizrefresh" type="button" title="Re-run on current code">
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" fill="none" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M13.8 1.8v3h-3" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="mini-ic" id="vizclose" type="button" title="Close">
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="viz-body" id="vizbody"></div>
 </section>
 
 <script src="app.js"></script>

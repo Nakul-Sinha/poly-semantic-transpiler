@@ -64,6 +64,13 @@ Run. Programs that use semantic holes go through the validated LLM layer
 live fills, the key stays in memory only). The Check button runs the 3-way
 differential self-check right in the output pane.
 
+The stages button in the top left corner splits the screen: the terminal slides
+to the left half and a pipeline panel opens beside it, showing all six compiler
+stages run on the code currently in the editor, with the real artifacts of each
+stage (tokens, AST, inferred types, IR and hole contracts, gate records,
+generated code). With an API key in the header field, the LLM adds a one
+sentence narration per stage about that specific program.
+
 The page looks for background artwork at `web/static/bg.jpg` (also accepts
 .png, .jpeg or .webp under the name `bg`); a soft gradient is used until the
 file exists.
