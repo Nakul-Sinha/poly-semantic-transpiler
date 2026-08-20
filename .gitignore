@@ -17,3 +17,7 @@ poly/llm/cache/*.json
 *.exe
 _t.c
 out_*
+
+# Harness config and local background artwork (third-party image, not committed)
+.claude/
+web/static/bg.jpg
