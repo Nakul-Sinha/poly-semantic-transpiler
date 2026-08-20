@@ -35,7 +35,7 @@ body {
     url("/bg"),
     radial-gradient(120% 90% at 50% 8%, #eef1f6 0%, #cdd3e0 42%, #9aa3b8 100%);
   background-repeat: no-repeat, no-repeat;
-  background-position: center 38%, center;
+  background-position: center, center;
   background-size: cover, cover;
   background-attachment: fixed, fixed;
 }
@@ -196,6 +196,7 @@ textarea, pre {
   flex: 1; min-height: 0; padding: 12px 16px;
   font-family: var(--mono); font-size: 12.8px; line-height: 1.6;
   color: var(--ink); tab-size: 4;
+  font-variant-ligatures: none;  /* show the exact source characters */
 }
 textarea {
   border: 0; outline: 0; resize: none; background: transparent;
