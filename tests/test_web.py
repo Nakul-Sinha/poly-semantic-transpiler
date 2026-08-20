@@ -37,3 +37,25 @@ def test_selfcheck_reports_rows():
     assert r["ok"] and r["all_ok"] is True
     names = {row["name"] for row in r["rows"]}
     assert "IR interpreter" in names
+
+
+def test_pipeline_six_stages():
+    src = "xs = [1, 2, 3, 4]\nys = [x * x for x in xs if x % 2 == 0]\nprint(ys)\n"
+    r = server.api_pipeline({"source": src, "target": "py"})
+    assert r["ok"] and r["narrated"] is False
+    names = [s["name"] for s in r["stages"]]
+    assert names == ["Lexical analysis", "Parsing", "Semantic analysis",
+                     "IR lowering", "LLM hole filling", "Code generation"]
+    assert all(s["status"] == "ok" for s in r["stages"])
+    assert "NAME('xs')" in r["stages"][0]["detail"]
+    assert "hole contract:" in r["stages"][3]["detail"]
+    assert "gates A/B/C passed" in r["stages"][4]["detail"]
+    assert "def hole_0(xs):" in r["stages"][5]["detail"]
+
+
+def test_pipeline_error_blocks_later_stages():
+    r = server.api_pipeline({"source": "y = x + 1\n", "target": "js"})
+    statuses = {s["name"]: s["status"] for s in r["stages"]}
+    assert statuses["Semantic analysis"] == "error"
+    assert statuses["IR lowering"] == "blocked"
+    assert statuses["Code generation"] == "blocked"
