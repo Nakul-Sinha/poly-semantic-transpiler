@@ -48,11 +48,34 @@ python -m poly examples/gcd.py --self-check          # 3-way differential report
 python -m poly examples/gcd.py --target js --no-llm  # prove the compiler is complete without the LLM
 ```
 
+## Web interface
+
+A minimal glassmorphic UI for the transpiler: a movable, resizable dual pane
+glass terminal with your Python source on the left and generated code on the
+right.
+
+```bash
+python web/server.py
+```
+
+Open http://127.0.0.1:8765, pick a target (JavaScript, Python, C) and press
+Run. Programs that use semantic holes go through the validated LLM layer
+(offline mock by default; paste an Anthropic API key into the header field for
+live fills, the key stays in memory only). The Check button runs the 3-way
+differential self-check right in the output pane.
+
+The page looks for background artwork at `web/static/bg.jpg` (any large image
+works; a soft gradient is used if the file is absent).
+
+Note: the self-check executes the submitted program with CPython as the
+reference oracle, so keep the server on localhost (the default).
+
 ## Repository layout
 
 ```
 docs/           PRD, architecture, language & IR specs, phase plan, testing strategy
 poly/           the compiler (front-end, semantic, IR, interpreter, back-ends, LLM layer, CLI)
+web/            local web interface (stdlib HTTP server + glass UI)
 examples/       sample Python-subset programs
 tests/          pytest suite (unit + golden differential tests)
 .github/        CI workflow (python + node + gcc)

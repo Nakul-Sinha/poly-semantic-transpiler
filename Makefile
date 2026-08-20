@@ -1,5 +1,5 @@
 # Poly — dev tasks. (Targets assume a POSIX shell; on Windows use WSL/Git Bash.)
-.PHONY: install test selfcheck transpile clean
+.PHONY: install test selfcheck transpile web clean
 
 install:
 	python -m pip install -e ".[dev]"
@@ -16,6 +16,9 @@ transpile:
 	@python -m poly $(EX) -t js -o build/out.js  || true
 	@python -m poly $(EX) -t py -o build/out.py  || true
 	@python -m poly $(EX) -t c  -o build/out.c   || true
+
+web:
+	python web/server.py
 
 clean:
 	rm -rf build **/__pycache__ .pytest_cache *.egg-info poly/llm/cache/*.json

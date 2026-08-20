@@ -1,0 +1,258 @@
+/* Poly web interface. Glassmorphic dual-pane terminal over full-bleed artwork. */
+
+:root {
+  --ink: #1c2333;
+  --ink-soft: rgba(28, 35, 51, 0.62);
+  --ink-faint: rgba(28, 35, 51, 0.42);
+  --glass-hi: rgba(255, 255, 255, 0.42);
+  --glass-lo: rgba(255, 255, 255, 0.12);
+  --edge-1: rgba(255, 255, 255, 0.95);
+  --edge-2: rgba(255, 255, 255, 0.18);
+  --edge-3: rgba(255, 255, 255, 0.55);
+  --shadow: 0 30px 70px rgba(23, 30, 52, 0.35), 0 6px 18px rgba(23, 30, 52, 0.18);
+  --radius: 28px;
+  --mono: "JetBrains Mono", Consolas, "Cascadia Mono", monospace;
+  --sans: "Poppins", "Segoe UI", system-ui, sans-serif;
+  --ok: #1f7a4d;
+  --bad: #b23a48;
+  --warn: #8a6d1f;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  overflow: hidden;
+  /* The artwork sits under everything. The image is portrait, so `cover` +
+     a tuned vertical position shows its central band as a horizontal scene.
+     If bg.jpg is absent the gradient layer beneath still paints the page. */
+  background-color: #c3c9d6;
+  background-image:
+    url("bg.jpg"),
+    radial-gradient(120% 90% at 50% 8%, #eef1f6 0%, #cdd3e0 42%, #9aa3b8 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-position: center 38%, center;
+  background-size: cover, cover;
+  background-attachment: fixed, fixed;
+}
+
+/* gentle vignette so the glass edges read against bright clouds */
+.veil {
+  position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(115% 100% at 50% 45%,
+              rgba(18, 24, 40, 0) 55%, rgba(18, 24, 40, 0.22) 100%);
+}
+
+/* ---- brand, echoing the reference type treatment ---- */
+.brand {
+  position: fixed; top: 34px; right: 46px; text-align: right;
+  user-select: none; pointer-events: none;
+  text-shadow: 0 1px 14px rgba(255, 255, 255, 0.55), 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+.brand h1 { font-size: 27px; font-weight: 300; letter-spacing: 0.015em; }
+.brand h1 b { font-weight: 800; }
+.brand .tag { font-style: italic; font-weight: 300; font-size: 13.5px; margin-top: 3px; color: rgba(28, 35, 51, 0.78); }
+
+/* =================== the glass tile =================== */
+.tile {
+  position: fixed;
+  display: flex; flex-direction: column;
+  min-width: 660px; min-height: 380px;
+  border-radius: var(--radius);
+  background: linear-gradient(133deg, var(--glass-hi) 0%, var(--glass-lo) 55%, rgba(255, 255, 255, 0.22) 100%);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  touch-action: none;
+}
+/* gradient hairline border: bright top-left, dim middle, medium bottom-right */
+.tile::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.4px;
+  background: linear-gradient(133deg, var(--edge-1), var(--edge-2) 46%, var(--edge-3));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---- header row ---- */
+.tile-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 14px 18px 10px 18px; cursor: grab;
+}
+.tile-head:active { cursor: grabbing; }
+
+.dots { display: inline-flex; gap: 6px; margin-right: 4px; }
+.dots i {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(28, 35, 51, 0.16);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.flow { color: var(--ink-faint); font-size: 15px; }
+
+/* chips share one recipe */
+.dd-trigger, .btn, .key {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18));
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(23, 30, 52, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+/* dropdowns */
+.dd { position: relative; }
+.dd-trigger {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px 7px 12px; cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.dd-trigger:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.28)); }
+.dd-label {
+  font-size: 8.5px; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-faint);
+  display: block; text-align: left;
+}
+.dd-value { font-size: 12.5px; font-weight: 500; }
+.chev { width: 10px; height: 6px; fill: none; stroke: var(--ink-soft); stroke-width: 1.6; stroke-linecap: round; }
+.dd.open .chev { transform: rotate(180deg); }
+
+.dd-menu {
+  position: absolute; top: calc(100% + 7px); left: 0; z-index: 30;
+  min-width: 100%; list-style: none; padding: 5px; display: none;
+  border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.6);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.38));
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  box-shadow: 0 18px 44px rgba(23, 30, 52, 0.28);
+}
+.dd.open .dd-menu { display: block; }
+.dd-menu li {
+  padding: 7px 14px; border-radius: 10px; cursor: pointer;
+  font-size: 12.5px; font-weight: 500; white-space: nowrap;
+}
+.dd-menu li:hover { background: rgba(255, 255, 255, 0.55); }
+.dd-menu li.on { background: rgba(28, 35, 51, 0.08); }
+
+/* buttons */
+.btn { padding: 8px 18px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease; }
+.btn.primary {
+  background: linear-gradient(180deg, rgba(36, 42, 60, 0.94), rgba(24, 29, 44, 0.92));
+  color: #f4f6fb; border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 22px rgba(20, 25, 42, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 11px 26px rgba(20, 25, 42, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
+.btn.primary:disabled { opacity: 0.55; transform: none; cursor: wait; }
+.btn.ghost:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.28)); }
+
+.spacer { flex: 1; }
+
+/* api key field */
+.key { display: flex; align-items: center; gap: 7px; padding: 7px 12px; }
+.key svg { width: 14px; height: 14px; fill: var(--ink-faint); flex: none; }
+.key input {
+  border: 0; outline: 0; background: transparent; color: var(--ink);
+  font-family: var(--sans); font-size: 12px; width: 84px;
+  transition: width 0.25s ease;
+}
+.key input::placeholder { color: var(--ink-faint); }
+.key:focus-within { border-color: rgba(255, 255, 255, 0.85); }
+.key input:focus { width: 190px; }
+
+/* ---- panes ---- */
+.panes { flex: 1; display: flex; min-height: 0; padding: 2px 16px 10px 16px; }
+
+.pane {
+  flex: 1 1 0; min-width: 170px; display: flex; flex-direction: column; min-height: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.22));
+  box-shadow: inset 0 2px 10px rgba(23, 30, 52, 0.09);
+  overflow: hidden;
+}
+#pane-src { flex: 0 0 50%; }
+
+.pane-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px 7px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+}
+.pane-label {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.mini {
+  border: 0; background: transparent; cursor: pointer;
+  font-family: var(--sans); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft);
+  padding: 2px 6px; border-radius: 7px;
+}
+.mini:hover { background: rgba(255, 255, 255, 0.5); }
+
+textarea, pre {
+  flex: 1; min-height: 0; padding: 12px 16px;
+  font-family: var(--mono); font-size: 12.8px; line-height: 1.6;
+  color: var(--ink); tab-size: 4;
+}
+textarea {
+  border: 0; outline: 0; resize: none; background: transparent;
+  white-space: pre; overflow: auto;
+}
+pre { overflow: auto; }
+pre code { font-family: inherit; white-space: pre; }
+pre .placeholder { color: var(--ink-faint); font-style: italic; }
+pre .err { color: var(--bad); }
+pre .ok { color: var(--ok); }
+pre .skip { color: var(--warn); }
+
+/* pane divider */
+.divider { flex: 0 0 12px; cursor: col-resize; position: relative; }
+.divider::after {
+  content: ""; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px; height: 44px; border-radius: 3px;
+  background: rgba(28, 35, 51, 0.18);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  transition: background 0.15s ease, height 0.15s ease;
+}
+.divider:hover::after, .divider.active::after { background: rgba(28, 35, 51, 0.34); height: 60px; }
+
+/* ---- status bar ---- */
+.statusbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 22px 11px 22px;
+  font-family: var(--mono); font-size: 10.5px; color: var(--ink-soft);
+}
+.statusbar .err { color: var(--bad); }
+.statusbar .ok { color: var(--ok); }
+
+/* resize grip */
+.grip { position: absolute; right: 4px; bottom: 4px; width: 22px; height: 22px; cursor: nwse-resize; }
+.grip::before {
+  content: ""; position: absolute; right: 5px; bottom: 5px; width: 10px; height: 10px;
+  border-right: 2px solid rgba(28, 35, 51, 0.3);
+  border-bottom: 2px solid rgba(28, 35, 51, 0.3);
+  border-radius: 2px;
+}
+
+/* thin translucent scrollbars */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: rgba(28, 35, 51, 0.2); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(28, 35, 51, 0.35); border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* selection tint */
+::selection { background: rgba(36, 42, 60, 0.18); }
+
+/* small screens: tile fills the viewport, panes stack */
+@media (max-width: 700px) {
+  .tile { left: 10px !important; top: 10px !important; right: 10px; bottom: 10px; width: auto !important; height: auto !important; min-width: 0; min-height: 0; }
+  .panes { flex-direction: column; }
+  #pane-src { flex: 1 1 0; }
+  .divider { display: none; }
+  .brand { top: auto; bottom: 18px; right: 20px; }
+  .grip { display: none; }
+}
