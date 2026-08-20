@@ -47,16 +47,6 @@ body {
               rgba(18, 24, 40, 0) 55%, rgba(18, 24, 40, 0.22) 100%);
 }
 
-/* ---- brand, echoing the reference type treatment ---- */
-.brand {
-  position: fixed; top: 34px; right: 46px; text-align: right;
-  user-select: none; pointer-events: none;
-  text-shadow: 0 1px 14px rgba(255, 255, 255, 0.55), 0 1px 2px rgba(255, 255, 255, 0.35);
-}
-.brand h1 { font-size: 27px; font-weight: 300; letter-spacing: 0.015em; }
-.brand h1 b { font-weight: 800; }
-.brand .tag { font-style: italic; font-weight: 300; font-size: 13.5px; margin-top: 3px; color: rgba(28, 35, 51, 0.78); }
-
 /* =================== the glass tile =================== */
 .tile {
   position: fixed;
@@ -260,6 +250,5 @@ pre .skip { color: var(--warn); }
   .panes { flex-direction: column; }
   #pane-src { flex: 1 1 0; }
   .divider { display: none; }
-  .brand { top: auto; bottom: 18px; right: 20px; }
   .grip { display: none; }
 }

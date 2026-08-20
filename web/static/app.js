@@ -42,8 +42,9 @@ function save() {
 
 function applyLayout() {
   const vw = innerWidth, vh = innerHeight;
-  let w = state.w || Math.min(1060, vw * 0.78);
-  let h = state.h || Math.min(640, vh * 0.74);
+  // default: near-fullscreen with a slim margin of artwork around the glass
+  let w = state.w || (vw - 144);
+  let h = state.h || (vh - 80);
   w = Math.max(660, Math.min(w, vw - 16));
   h = Math.max(380, Math.min(h, vh - 16));
   let x = state.x ?? (vw - w) / 2;
