@@ -29,13 +29,18 @@ print(nums[1:4])
 
 const state = load() || {};
 
+const STORE_KEY = "poly.win.v2";   // v2: discard layouts saved while the visualizer split was active
+
 function load() {
-  try { return JSON.parse(localStorage.getItem("poly.win")); } catch { return null; }
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch { return null; }
 }
 function save() {
-  const r = tile.getBoundingClientRect();
-  localStorage.setItem("poly.win", JSON.stringify({
-    x: r.left, y: r.top, w: r.width, h: r.height,
+  // While the visualizer split is active, persist the remembered full-span
+  // geometry, never the temporary half-screen one.
+  const b = tile.getBoundingClientRect();
+  const r = (vizOpen && savedRect) ? savedRect : { x: b.left, y: b.top, w: b.width, h: b.height };
+  localStorage.setItem(STORE_KEY, JSON.stringify({
+    x: r.x, y: r.y, w: r.w, h: r.h,
     split: parseFloat(paneSrc.style.flexBasis) || 50, target,
   }));
 }
