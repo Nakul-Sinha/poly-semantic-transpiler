@@ -32,7 +32,7 @@ body {
      If bg.jpg is absent the gradient layer beneath still paints the page. */
   background-color: #c3c9d6;
   background-image:
-    url("bg.jpg"),
+    url("/bg"),
     radial-gradient(120% 90% at 50% 8%, #eef1f6 0%, #cdd3e0 42%, #9aa3b8 100%);
   background-repeat: no-repeat, no-repeat;
   background-position: center 38%, center;

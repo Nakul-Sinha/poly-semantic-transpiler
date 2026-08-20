@@ -127,6 +127,14 @@ class Handler(BaseHTTPRequestHandler):
     # ---- static files -----------------------------------------------------
     def do_GET(self):
         path = self.path.split("?", 1)[0]
+        if path == "/bg":            # background artwork under any common name
+            for ext in ("jpg", "jpeg", "png", "webp"):
+                file = STATIC / f"bg.{ext}"
+                if file.is_file():
+                    self._send(200, file.read_bytes(), MIME[f".{ext}"])
+                    return
+            self._send(404, b"drop the artwork at web/static/bg.jpg", "text/plain")
+            return
         name = "index.html" if path in ("/", "") else path.lstrip("/")
         file = (STATIC / name).resolve()
         if not str(file).startswith(str(STATIC)) or not file.is_file():
