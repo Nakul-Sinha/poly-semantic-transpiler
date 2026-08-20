@@ -10,6 +10,8 @@
   --edge-2: rgba(0, 0, 0, 0.16);
   --edge-3: rgba(0, 0, 0, 0.36);
   --stroke: rgba(0, 0, 0, 0.34);
+  --band: rgba(12, 15, 23, 0.55);       /* dark translucent chrome bands */
+  --band-ink: #e7ebf4;                  /* text on the dark bands */
   --shadow: 0 30px 70px rgba(23, 30, 52, 0.35), 0 6px 18px rgba(23, 30, 52, 0.18);
   --radius: 28px;
   --mono: "JetBrains Mono", Consolas, "Cascadia Mono", monospace;
@@ -53,7 +55,7 @@ body {
   display: flex; flex-direction: column;
   min-width: 660px; min-height: 380px;
   border-radius: var(--radius);
-  background: linear-gradient(133deg, var(--glass-hi) 0%, var(--glass-lo) 55%, rgba(255, 255, 255, 0.08) 100%);
+  background: linear-gradient(133deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 55%, rgba(255, 255, 255, 0.03) 100%);
   backdrop-filter: blur(26px) saturate(150%) brightness(1.22);
   -webkit-backdrop-filter: blur(26px) saturate(150%) brightness(1.22);
   box-shadow: var(--shadow);
@@ -71,23 +73,25 @@ body {
 /* ---- header row ---- */
 .tile-head {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding: 6px 10px 5px 10px; cursor: grab;
+  padding: 7px 11px 6px 11px; cursor: grab;
+  background: var(--band);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
 }
 .tile-head:active { cursor: grabbing; }
 
 .dots { display: inline-flex; gap: 6px; margin-right: 4px; }
 .dots i {
   width: 10px; height: 10px; border-radius: 50%;
-  background: rgba(28, 35, 51, 0.16);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.30);
 }
 
-.flow { color: var(--ink-faint); font-size: 15px; }
+.flow { color: rgba(255, 255, 255, 0.55); font-size: 15px; }
 
 /* chips share one recipe */
 .dd-trigger, .btn, .key {
   border: 1px solid var(--stroke);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.12));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
   border-radius: 13px;
   box-shadow: 0 2px 10px rgba(23, 30, 52, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.20);
   color: var(--ink);
@@ -101,7 +105,7 @@ body {
   padding: 5px 11px; cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
 }
-.dd-trigger:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.20)); }
+.dd-trigger:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.85)); }
 .dd-label {
   font-size: 8.5px; font-weight: 600; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--ink-faint);
@@ -132,12 +136,12 @@ body {
 .btn { padding: 6px 16px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease; }
 .btn.primary {
   background: linear-gradient(180deg, rgba(36, 42, 60, 0.94), rgba(24, 29, 44, 0.92));
-  color: #f4f6fb; border-color: rgba(255, 255, 255, 0.25);
+  color: #f4f6fb; border-color: rgba(255, 255, 255, 0.38);
   box-shadow: 0 8px 22px rgba(20, 25, 42, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .btn.primary:hover { transform: translateY(-1px); box-shadow: 0 11px 26px rgba(20, 25, 42, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
 .btn.primary:disabled { opacity: 0.55; transform: none; cursor: wait; }
-.btn.ghost:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.20)); }
+.btn.ghost:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.85)); }
 
 .spacer { flex: 1; }
 
@@ -160,7 +164,7 @@ body {
   flex: 1 1 0; min-width: 170px; display: flex; flex-direction: column; min-height: 0;
   border-radius: 15px;
   border: 1px solid var(--stroke);
-  background: rgba(255, 255, 255, 0.02);   /* nearly invisible veil */
+  background: rgba(255, 255, 255, 0.01);   /* 99% transparent */
   overflow: hidden;
 }
 #pane-src { flex: 0 0 50%; }
@@ -215,22 +219,22 @@ pre .skip { color: var(--warn); }
 /* ---- status bar ---- */
 .statusbar {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 3px 14px 6px 14px;
-  font-family: var(--mono); font-size: 10.5px; color: var(--ink);
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 1px 2px rgba(255, 255, 255, 0.35);
-  /* light pools at the base of the glass so status text survives dark artwork */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.22) 100%);
-  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 4px 15px 6px 15px;
+  font-family: var(--mono); font-size: 10.5px; color: var(--band-ink);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  background: var(--band);
+  border-top: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px);
 }
-.statusbar .err { color: var(--bad); }
-.statusbar .ok { color: var(--ok); }
+.statusbar .err { color: #ff9aa2; }
+.statusbar .ok { color: #8fdcae; }
 
 /* resize grip */
 .grip { position: absolute; right: 4px; bottom: 4px; width: 22px; height: 22px; cursor: nwse-resize; }
 .grip::before {
   content: ""; position: absolute; right: 5px; bottom: 5px; width: 10px; height: 10px;
-  border-right: 2px solid rgba(28, 35, 51, 0.3);
-  border-bottom: 2px solid rgba(28, 35, 51, 0.3);
+  border-right: 2px solid rgba(255, 255, 255, 0.45);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 2px;
 }
 

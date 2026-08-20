@@ -18,6 +18,7 @@ poly/llm/cache/*.json
 _t.c
 out_*
 
-# Harness config and local background artwork (third-party image, not committed)
+# Harness config and local artwork assets (third-party images, not committed)
 .claude/
 web/static/bg.*
+web/static/favicon.*
