@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from . import ir
 from .codegen import generate
@@ -88,8 +89,13 @@ def _run_self_check(source: str, module, no_llm: bool) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="poly", description="Poly semantic transpiler")
-    ap.add_argument("source", help="path to a Python-subset source file")
-    ap.add_argument("-t", "--target", default="js", choices=["js", "py", "python", "c"],
+    from .languages import LANGUAGES, language
+    ap.add_argument("source", help="path to a source file")
+    ap.add_argument("--from", "--source-lang", dest="source_lang", help="input language (inferred from file extension)")
+    ap.add_argument("--ai", action="store_true", help="use AI translation even for Python input")
+    ap.add_argument("--provider", choices=["auto", "claude", "anthropic"], default="auto")
+    ap.add_argument("--model", default="", help="override the translation model")
+    ap.add_argument("-t", "--target", default="js",
                     help="target language (default: js)")
     ap.add_argument("-o", "--output", help="write result to a file instead of stdout")
     ap.add_argument("--no-llm", action="store_true",
@@ -98,6 +104,13 @@ def main(argv=None) -> int:
     ap.add_argument("--self-check", action="store_true",
                     help="run the 3-way differential self-check and exit")
     args = ap.parse_args(argv)
+    try:
+        args.target = language(args.target)
+        ext = Path(args.source).suffix.lower()
+        inferred = next((k for k, v in LANGUAGES.items() if v["extension"] == ext), "py")
+        source_lang = language(args.source_lang or inferred)
+    except ValueError as exc:
+        ap.error(str(exc))
 
     try:
         with open(args.source, encoding="utf-8") as f:
@@ -107,6 +120,31 @@ def main(argv=None) -> int:
         return 2
 
     try:
+        if (args.ai or source_lang != "py" or args.target not in ("js", "py", "c")
+                or (source_lang == args.target and not (args.dump or args.self_check))):
+            from .translate import translate
+            from .validation import check_code
+            if args.no_llm and source_lang != args.target:
+                raise ValueError("This language pair requires AI translation; remove --no-llm.")
+            if args.dump:
+                raise ValueError("Stage dumps are available for the Python compiler. Use the web pipeline for AI translation.")
+            result = translate(source, source_lang, args.target, provider=args.provider, model=args.model)
+            code = result["code"]
+            print(result["validation"]["detail"], file=sys.stderr)
+            if args.self_check:
+                original = check_code(source, source_lang, execute=True)
+                actual = check_code(code, args.target, execute=True)
+                if original["status"] != "passed" or actual["status"] != "passed":
+                    print(f"Check incomplete: {original['detail']} / {actual['detail']}")
+                    return 1
+                ok = original["output"].rstrip() == actual["output"].rstrip()
+                print("Outputs match on this run." if ok else f"Outputs differ:\n{original['output']}\n{actual['output']}")
+                return 0 if ok else 1
+            if args.output:
+                Path(args.output).write_text(code, encoding="utf-8")
+            else:
+                sys.stdout.write(code)
+            return 0
         if args.dump == "tokens":
             for t in tokenize(source):
                 print(t)
@@ -125,6 +163,9 @@ def main(argv=None) -> int:
         code = generate(module, args.target)
     except PolyError as exc:
         print(exc.render(source), file=sys.stderr)
+        return 1
+    except (ValueError, OSError) as exc:
+        print(str(exc), file=sys.stderr)
         return 1
 
     if args.output:

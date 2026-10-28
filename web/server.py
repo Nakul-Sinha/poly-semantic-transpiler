@@ -35,6 +35,9 @@ from poly.lexer import tokenize                   # noqa: E402
 from poly.lower import lower                      # noqa: E402
 from poly.parser import parse                     # noqa: E402
 from poly.semantic import analyze                 # noqa: E402
+from poly.languages import LANGUAGES, language    # noqa: E402
+from poly.translate import translate, provider_available  # noqa: E402
+from poly.validation import check_code            # noqa: E402
 
 STATIC = Path(__file__).resolve().parent / "static"
 MIME = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -75,7 +78,7 @@ def _fill(module, targets, api_key: str, no_llm: bool) -> list[dict]:
                 os.environ["ANTHROPIC_API_KEY"] = old
 
 
-def api_transpile(payload: dict) -> dict:
+def _native_transpile(payload: dict) -> dict:
     source = payload.get("source", "")
     target = payload.get("target", "js")
     api_key = (payload.get("api_key") or "").strip()
@@ -98,7 +101,7 @@ def api_transpile(payload: dict) -> dict:
                 "ms": round((time.perf_counter() - t0) * 1000)}
 
 
-def api_selfcheck(payload: dict) -> dict:
+def _native_selfcheck(payload: dict) -> dict:
     source = payload.get("source", "")
     api_key = (payload.get("api_key") or "").strip()
     no_llm = bool(payload.get("no_llm"))
@@ -120,6 +123,92 @@ def api_selfcheck(payload: dict) -> dict:
         return {"ok": False, "error": {"message": str(exc),
                                        "rendered": f"internal error: {exc}"},
                 "ms": round((time.perf_counter() - t0) * 1000)}
+
+
+def _request(payload):
+    if not isinstance(payload, dict):
+        raise ValueError("Expected a JSON object.")
+    source = payload.get("source", "")
+    if not isinstance(source, str) or not source.strip():
+        raise ValueError("Enter a program to translate.")
+    if len(source) > 60000:
+        raise ValueError("Please translate programs smaller than 60,000 characters.")
+    return source, language(payload.get("source_lang", "py")), language(payload.get("target", "js"))
+
+
+def _error(exc, started):
+    return {"ok": False, "error": {"message": str(exc), "rendered": str(exc)},
+            "ms": round((time.perf_counter() - started) * 1000)}
+
+
+def api_transpile(payload: dict) -> dict:
+    started = time.perf_counter()
+    try:
+        source, src_lang, target = _request(payload)
+        provider = payload.get("provider", "auto")
+        api_key = str(payload.get("api_key") or "").strip()
+        engine = payload.get("engine", "auto")
+        if engine not in ("auto", "compiler", "llm"):
+            raise ValueError("Unknown translation engine.")
+        if src_lang == target and "source_lang" in payload and engine != "compiler":
+            result = translate(source, src_lang, target, api_key=api_key, provider=provider,
+                               model=str(payload.get("model") or "").strip())
+            return {"ok": True, "records": [], **result, "ms": round((time.perf_counter() - started) * 1000)}
+        if src_lang == "py" and target in ("py", "js", "c") and engine != "llm":
+            native = _native_transpile({**payload, "target": target})
+            if native["ok"]:
+                native.update(engine="compiler", validation=check_code(native["code"], target))
+                if native["validation"]["status"] != "failed":
+                    return native
+                native = _error(ValueError(native["validation"]["detail"]), started)
+            if "source_lang" not in payload or engine == "compiler" or payload.get("no_llm") or not provider_available(api_key, provider):
+                return native
+        elif engine == "compiler":
+            raise ValueError("The handwritten compiler accepts Python and emits Python, JavaScript or C. Choose Auto for all languages.")
+        if payload.get("no_llm") and src_lang != target:
+            raise ValueError("This language pair needs AI translation. Enable it or use Python to Python/JavaScript/C.")
+        result = translate(source, src_lang, target, api_key=api_key, provider=provider,
+                           model=str(payload.get("model") or "").strip())
+        return {"ok": True, "records": [], **result, "ms": round((time.perf_counter() - started) * 1000)}
+    except Exception as exc:
+        return _error(exc, started)
+
+
+def api_selfcheck(payload: dict) -> dict:
+    started = time.perf_counter()
+    try:
+        source, src_lang, target = _request(payload)
+        # Preserve the original three-way compiler check for existing callers.
+        if "source_lang" not in payload:
+            return _native_selfcheck(payload)
+        # The Check button explicitly requests execution of the user's local programs.
+        original = check_code(source, src_lang, execute=True, stdin=str(payload.get("stdin", "")))
+        if original["status"] == "failed":
+            return {"ok": True, "all_ok": False, "verified": False, "rows": [
+                {"name": "Source program", "status": "ERROR", "output": original["detail"]}],
+                "ms": round((time.perf_counter() - started) * 1000)}
+        supplied = payload.get("translated_code")
+        translated = ({"ok": True, "code": supplied} if isinstance(supplied, str) and supplied.strip()
+                      and len(supplied) <= 150000 else api_transpile(payload))
+        if not translated["ok"]:
+            return translated
+        actual = check_code(translated["code"], target, execute=True, stdin=str(payload.get("stdin", "")))
+        rows = []
+        for name, result in (("Source program", original), ("Translated program", actual)):
+            status = {"passed": "pass", "failed": "ERROR", "unavailable": "skipped"}[result["status"]]
+            rows.append({"name": name, "status": status, "output": result.get("output", result["detail"])})
+        verified = original["status"] == actual["status"] == "passed"
+        if verified:
+            match = original["output"].replace("\r\n", "\n").rstrip() == actual["output"].replace("\r\n", "\n").rstrip()
+            rows.append({"name": "Output comparison", "status": "pass" if match else "FAIL",
+                         "output": "Outputs match on this run." if match else
+                         f"Source:\n{original['output']}\nTranslation:\n{actual['output']}"})
+        else:
+            match = False
+        return {"ok": True, "all_ok": verified and match, "verified": verified, "rows": rows,
+                "code": translated["code"], "ms": round((time.perf_counter() - started) * 1000)}
+    except Exception as exc:
+        return _error(exc, started)
 
 
 # ---- pipeline visualizer -------------------------------------------------
@@ -196,7 +285,7 @@ def _narrate(stages: list[dict], source: str, api_key: str) -> list[str] | None:
     return None
 
 
-def api_pipeline(payload: dict) -> dict:
+def _native_pipeline(payload: dict) -> dict:
     source = payload.get("source", "")
     target = payload.get("target", "js")
     api_key = (payload.get("api_key") or "").strip()
@@ -306,6 +395,32 @@ def api_pipeline(payload: dict) -> dict:
             "ms": round((time.perf_counter() - t0) * 1000)}
 
 
+def api_pipeline(payload: dict) -> dict:
+    started = time.perf_counter()
+    try:
+        source, src_lang, target = _request(payload)
+        if src_lang == "py" and target in ("js", "py", "c") and payload.get("engine", "auto") != "llm":
+            native = _native_pipeline(payload)
+            if "source_lang" not in payload or all(s["status"] == "ok" for s in native["stages"]):
+                return native
+        result = api_transpile(payload)
+        stages = [{"name": "Source language", "status": "ok", "ms": 0,
+                   "detail": f"{LANGUAGES[src_lang]['name']} to {LANGUAGES[target]['name']}\n{len(source)} characters"}]
+        if result["ok"]:
+            stages.extend([
+                {"name": "Translation", "status": "ok", "ms": result["ms"],
+                 "detail": f"Engine: {result['engine']}. Complete program translated; compiler checks available locally."},
+                {"name": "Target compiler check", "status": "ok" if result["validation"]["status"] == "passed" else "blocked",
+                 "ms": 0, "detail": result["validation"]["detail"]},
+                {"name": "Generated code", "status": "ok", "ms": 0, "detail": result["code"]}])
+        else:
+            stages.append({"name": "Translation", "status": "error", "ms": result["ms"], "detail": result["error"]["message"]})
+        return {"ok": True, "stages": stages, "narrated": False,
+                "ms": round((time.perf_counter() - started) * 1000)}
+    except Exception as exc:
+        return _error(exc, started)
+
+
 _ROUTES = {"/api/transpile": api_transpile, "/api/selfcheck": api_selfcheck,
            "/api/pipeline": api_pipeline}
 
@@ -314,6 +429,11 @@ class Handler(BaseHTTPRequestHandler):
     # ---- static files -----------------------------------------------------
     def do_GET(self):
         path = self.path.split("?", 1)[0]
+        if path == "/api/languages":
+            self._send(200, json.dumps({"languages": LANGUAGES,
+                       "claude_cli": bool(__import__("shutil").which("claude")),
+                       "api_configured": bool(os.environ.get("ANTHROPIC_API_KEY"))}).encode(), "application/json")
+            return
         if path == "/bg":            # background artwork under any common name
             for ext in ("jpg", "jpeg", "png", "webp"):
                 file = STATIC / f"bg.{ext}"
@@ -324,7 +444,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         name = "index.html" if path in ("/", "") else path.lstrip("/")
         file = (STATIC / name).resolve()
-        if not str(file).startswith(str(STATIC)) or not file.is_file():
+        if not file.is_relative_to(STATIC) or not file.is_file():
             self._send(404, b"not found", "text/plain")
             return
         self._send(200, file.read_bytes(), MIME.get(file.suffix.lower(), "application/octet-stream"))
@@ -337,7 +457,12 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             length = int(self.headers.get("Content-Length", 0))
+            if length < 0 or length > 1000000:
+                self._send(413, b'{"error":"request too large"}', "application/json")
+                return
             payload = json.loads(self.rfile.read(length) or b"{}")
+            if not isinstance(payload, dict):
+                raise ValueError("Expected a JSON object")
         except (ValueError, json.JSONDecodeError):
             self._send(400, b'{"error":"bad json"}', "application/json")
             return

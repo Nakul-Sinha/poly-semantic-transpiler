@@ -8,8 +8,25 @@ const panes = $("panes"), paneSrc = $("pane-src"), divider = $("divider");
 const src = $("src"), out = $("out"), statusEl = $("status"), timingEl = $("timing");
 const runBtn = $("run"), checkBtn = $("check"), copyBtn = $("copy"), keyEl = $("apikey");
 
-const TARGET_NAMES = { js: "JavaScript", py: "Python", c: "C" };
+const TARGET_NAMES = { py: "Python", js: "JavaScript", c: "C", cpp: "C++", java: "Java", cs: "C#", go: "Go", rust: "Rust", ruby: "Ruby", php: "PHP" };
+const EXTENSIONS = { py: ".py", js: ".js", c: ".c", cpp: ".cpp", java: ".java", cs: ".cs", go: ".go", rust: ".rs", ruby: ".rb", php: ".php" };
 let target = "js";
+let sourceLang = "py";
+let examples = {};
+let lastTranslation = null;
+let busy = false;
+const STORE_KEY = "poly.win.v2";
+for (const [id, selected] of [["dd-source", "py"], ["dd-target", "js"]]) {
+  const menu = $(id).querySelector(".dd-menu");
+  menu.replaceChildren(...Object.entries(TARGET_NAMES).map(([value, name]) => {
+    const li = document.createElement("li");
+    li.setAttribute("role", "option");
+    li.dataset.value = value;
+    li.textContent = name;
+    li.classList.toggle("on", value === selected);
+    return li;
+  }));
+}
 
 const DEFAULT_SOURCE = `def gcd(a: int, b: int) -> int:
     while b != 0:
@@ -29,7 +46,6 @@ print(nums[1:4])
 
 const state = load() || {};
 
-const STORE_KEY = "poly.win.v2";   // v2: discard layouts saved while the visualizer split was active
 
 function load() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch { return null; }
@@ -171,7 +187,7 @@ function closeViz() {
 }
 
 async function runPipeline() {
-  vizBody.innerHTML = '<div class="viz-msg">running the 6-stage pipeline on your code&hellip;</div>';
+  vizBody.innerHTML = '<div class="viz-msg">running the translation pipeline on your code&hellip;</div>';
   let r;
   try {
     r = await call("/api/pipeline", payload());
@@ -226,7 +242,7 @@ function renderPipeline(r) {
     hint.className = "viz-hint";
     hint.textContent = keyEl.value.trim()
       ? "AI narration unavailable for this run"
-      : "paste an API key in the header for an AI narration of each stage";
+      : "Compiler stages are shown for supported Python programs; other pairs use AI translation and local compiler checks.";
     vizBody.appendChild(hint);
   }
 }
@@ -249,6 +265,7 @@ function initDropdown(root, onPick) {
   const trigger = root.querySelector(".dd-trigger");
   const value = root.querySelector(".dd-value");
   trigger.addEventListener("click", (e) => {
+    if (busy) return;
     e.stopPropagation();
     const wasOpen = root.classList.contains("open");
     closeMenus();
@@ -268,8 +285,23 @@ function closeMenus() { document.querySelectorAll(".dd.open").forEach((d) => d.c
 addEventListener("click", closeMenus);
 addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenus(); });
 
-initDropdown($("dd-source"), null);
+initDropdown($("dd-source"), (v) => setSource(v));
 initDropdown($("dd-target"), (v) => setTarget(v, true));
+
+function setSource(v, restore = true) {
+  localStorage.setItem("poly.src." + sourceLang, src.value);
+  sourceLang = v;
+  localStorage.setItem("poly.sourceLang", v);
+  $("label-src").textContent = "source · " + TARGET_NAMES[v].toLowerCase();
+  const root = $("dd-source");
+  root.querySelectorAll("li").forEach((li) => li.classList.toggle("on", li.dataset.value === v));
+  root.querySelector(".dd-value").textContent = TARGET_NAMES[v];
+  if (restore) src.value = localStorage.getItem("poly.src." + v) ?? examples[v] ?? "";
+  lastTranslation = null;
+  showText("output appears here", "placeholder");
+  statusEl.textContent = "ready · " + TARGET_NAMES[v] + " → " + TARGET_NAMES[target];
+  timingEl.textContent = "";
+}
 
 function setTarget(v, fromUser) {
   target = v;
@@ -277,13 +309,22 @@ function setTarget(v, fromUser) {
   const root = $("dd-target");
   root.querySelectorAll("li").forEach((li) => li.classList.toggle("on", li.dataset.value === v));
   root.querySelector(".dd-value").textContent = TARGET_NAMES[v];
-  if (fromUser) save();
+  if (fromUser) {
+    lastTranslation = null;
+    showText("output appears here", "placeholder");
+    timingEl.textContent = "";
+    statusEl.textContent = "ready · " + TARGET_NAMES[sourceLang] + " → " + TARGET_NAMES[target];
+    save();
+  }
 }
 
 /* ---------------- editor niceties ---------------- */
 
 src.value = localStorage.getItem("poly.src") || DEFAULT_SOURCE;
-src.addEventListener("input", () => localStorage.setItem("poly.src", src.value));
+src.addEventListener("input", () => {
+  localStorage.setItem("poly.src." + sourceLang, src.value);
+  if (sourceLang === "py") localStorage.setItem("poly.src", src.value);
+});
 
 src.addEventListener("keydown", (e) => {
   if (e.key === "Tab") {
@@ -293,7 +334,7 @@ src.addEventListener("keydown", (e) => {
     e.preventDefault();
     const before = src.value.slice(0, src.selectionStart);
     const line = before.slice(before.lastIndexOf("\n") + 1);
-    const indent = (line.match(/^ */) || [""])[0] + (line.trimEnd().endsWith(":") ? "    " : "");
+    const indent = (line.match(/^ */) || [""])[0] + ((sourceLang === "py" ? line.trimEnd().endsWith(":") : line.trimEnd().endsWith("{")) ? "    " : "");
     insert("\n" + indent);
   }
 });
@@ -312,7 +353,7 @@ addEventListener("keydown", (e) => {
 
 async function call(path, body) {
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), 60000);
+  const timer = setTimeout(() => ctl.abort(), 360000);
   try {
     const res = await fetch(path, {
       method: "POST",
@@ -320,19 +361,26 @@ async function call(path, body) {
       body: JSON.stringify(body),
       signal: ctl.signal,
     });
+    if (!res.ok) throw new Error("Server returned HTTP " + res.status);
     return await res.json();
   } finally { clearTimeout(timer); }
 }
 
 function payload() {
-  return { source: src.value, target, api_key: keyEl.value.trim() };
+  return { source: src.value, source_lang: sourceLang, target, api_key: keyEl.value.trim(), provider: $("provider").value, model: $("model").value.trim() };
 }
 
 function setBusy(busy, msg) {
-  runBtn.disabled = checkBtn.disabled = busy;
+  setControlsBusy(busy);
   statusEl.textContent = msg;
   statusEl.className = "";
   timingEl.textContent = "";
+}
+
+function setControlsBusy(value) {
+  busy = value;
+  for (const id of ["run", "check", "swap", "example", "provider", "model", "apikey", "vizrefresh", "vizbtn"]) $(id).disabled = value;
+  src.readOnly = value;
 }
 
 function showText(text, cls) {
@@ -358,45 +406,52 @@ async function run() {
     const r = await call("/api/transpile", payload());
     if (r.ok) {
       showText(r.code);
-      statusEl.textContent = TARGET_NAMES[target].toLowerCase() + " · " + holeSummary(r.records);
+      lastTranslation = { source: src.value, sourceLang, target, code: r.code };
+      statusEl.textContent = TARGET_NAMES[sourceLang] + " → " + TARGET_NAMES[target] + " · " +
+        (r.engine === "compiler" ? "compiler" : r.engine === "identity" ? "same language" : "AI translation") + " · " +
+        (r.validation?.status === "passed" ? "compiler check passed" : "compiler unavailable; not checked");
       statusEl.className = "ok";
     } else {
+      lastTranslation = null;
       showText(r.error.rendered, "err");
       statusEl.textContent = r.error.message;
       statusEl.className = "err";
     }
     timingEl.textContent = (r.ms || 0) + " ms";
-  } catch {
-    setBusy(false, "server unreachable, is web/server.py running?");
+  } catch (err) {
+    setBusy(false, err.name === "AbortError" ? "translation timed out, please retry" : "server unreachable, is web/server.py running?");
     statusEl.className = "err";
     return;
   }
-  runBtn.disabled = checkBtn.disabled = false;
+  setControlsBusy(false);
 }
 
 async function check() {
   if (checkBtn.disabled) return;
-  setBusy(true, "running 3-way self-check…");
+  setBusy(true, "running source and translation locally…");
   try {
-    const r = await call("/api/selfcheck", payload());
+    const body = payload();
+    if (lastTranslation && lastTranslation.source === src.value && lastTranslation.sourceLang === sourceLang && lastTranslation.target === target) body.translated_code = lastTranslation.code;
+    const r = await call("/api/selfcheck", body);
     if (r.ok) {
       out.innerHTML = "";
       const code = document.createElement("code");
-      code.appendChild(line("3-way differential self-check\n", ""));
-      code.appendChild(line("CPython source vs IR interpreter vs targets\n\n", ""));
+      code.appendChild(line("Source ↔ translation check\n", ""));
+      code.appendChild(line(TARGET_NAMES[sourceLang] + " → " + TARGET_NAMES[target] + "\n\n", ""));
       const tag = { pass: ["PASS", "ok"], FAIL: ["FAIL", "err"], skipped: ["SKIP", "skip"], ERROR: ["ERR ", "err"] };
       for (const row of r.rows) {
         const [label, cls] = tag[row.status] || [row.status, ""];
         code.appendChild(line("  [", ""));
         code.appendChild(line(label, cls));
         code.appendChild(line("] " + row.name + "\n", ""));
-        if (row.status === "FAIL" || row.status === "ERROR")
+        if (row.output)
           code.appendChild(line("        " + row.output + "\n", "err"));
       }
       code.appendChild(line("\nRESULT: ", ""));
-      code.appendChild(line(r.all_ok ? "all consistent" : "DIVERGENCE DETECTED", r.all_ok ? "ok" : "err"));
+      code.appendChild(line(r.all_ok ? "outputs match on this run" : r.verified === false ? "could not verify this translation" : "DIVERGENCE DETECTED", r.all_ok ? "ok" : "err"));
       out.appendChild(code);
-      statusEl.textContent = r.all_ok ? "self-check consistent across all targets" : "divergence detected";
+      statusEl.textContent = r.all_ok ? "source and translation outputs match" : r.verified === false ? "check incomplete: see output" : "output mismatch";
+      if (r.code) lastTranslation = { source: src.value, sourceLang, target, code: r.code };
       statusEl.className = r.all_ok ? "ok" : "err";
     } else {
       showText(r.error.rendered, "err");
@@ -409,7 +464,7 @@ async function check() {
     statusEl.className = "err";
     return;
   }
-  runBtn.disabled = checkBtn.disabled = false;
+  setControlsBusy(false);
 }
 function line(text, cls) {
   const span = document.createElement("span");
@@ -430,3 +485,41 @@ runBtn.addEventListener("click", run);
 checkBtn.addEventListener("click", check);
 
 applyLayout();
+
+$("settingsbtn").addEventListener("click", () => {
+  $("settings").hidden = !$("settings").hidden;
+  $("settingsbtn").setAttribute("aria-expanded", String(!$("settings").hidden));
+});
+$("example").addEventListener("click", () => {
+  if (examples[sourceLang]) {
+    src.value = examples[sourceLang];
+    src.dispatchEvent(new Event("input"));
+    lastTranslation = null;
+    statusEl.textContent = TARGET_NAMES[sourceLang] + " example loaded";
+  }
+});
+$("swap").addEventListener("click", () => {
+  const translated = lastTranslation && lastTranslation.source === src.value && lastTranslation.sourceLang === sourceLang && lastTranslation.target === target ? lastTranslation.code : null;
+  const previous = sourceLang;
+  setSource(target);
+  setTarget(previous, true);
+  if (translated) {
+    src.value = translated;
+    src.dispatchEvent(new Event("input"));
+  }
+});
+$("download").addEventListener("click", () => {
+  if (!lastTranslation) { statusEl.textContent = "translate a program first"; return; }
+  const url = URL.createObjectURL(new Blob([lastTranslation.code], { type: "text/plain;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = (lastTranslation.target === "java" ? "Main" : "translated") + EXTENSIONS[lastTranslation.target];
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+fetch("/api/languages").then((r) => r.json()).then((data) => {
+  examples = Object.fromEntries(Object.entries(data.languages).map(([k, v]) => [k, v.example]));
+  $("service-info").textContent = data.api_configured ? "Server API access configured." : data.claude_cli ? "Claude CLI available. Uses your existing Claude login; no API key needed." : "Install Claude Code and sign in, or enter an Anthropic API key in the header.";
+  const previous = localStorage.getItem("poly.sourceLang");
+  if (previous && TARGET_NAMES[previous] && previous !== sourceLang) setSource(previous);
+}).catch(() => { $("service-info").textContent = "Cannot reach server. Start python web/server.py."; });

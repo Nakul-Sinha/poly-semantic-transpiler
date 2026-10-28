@@ -36,7 +36,7 @@
       </ul>
     </div>
 
-    <span class="flow" aria-hidden="true">&#8594;</span>
+    <button class="flow swap" id="swap" type="button" title="Swap input and output languages" aria-label="Swap languages">&#8644;</button>
 
     <div class="dd" id="dd-target">
       <button class="dd-trigger" type="button" aria-haspopup="listbox">
@@ -52,14 +52,23 @@
     </div>
 
     <button class="btn primary" id="run" type="button" title="Transpile (Ctrl+Enter)">Run</button>
-    <button class="btn ghost" id="check" type="button" title="3-way differential self-check">Check</button>
+    <button class="btn ghost" id="check" type="button" title="Execute source and translation locally, then compare stdout">Check</button>
+    <button class="mini" id="example" type="button" title="Load an example in the source language">example</button>
 
     <span class="spacer"></span>
 
-    <label class="key" title="Anthropic API key for live hole fills. Kept in memory only, never stored.">
+    <label class="key" title="Optional Anthropic API key. Leave empty to use your Claude CLI login. Never stored.">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4a5.5 5.5 0 1 0 5.37 6.7L21 12l-1.5 1.5L18 12l-1.5 1.5L15 12l-1.13 1.13A5.5 5.5 0 1 0 14.5 4Zm-2 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" transform="rotate(135 12 12)"/></svg>
-      <input id="apikey" type="password" placeholder="API key" autocomplete="off" spellcheck="false">
+      <input id="apikey" type="password" placeholder="API key (optional)" aria-label="Optional Anthropic API key" autocomplete="off" spellcheck="false">
     </label>
+    <button class="btn ghost" id="settingsbtn" type="button" aria-expanded="false">Settings</button>
+  </div>
+
+  <div class="settings" id="settings" hidden>
+    <label>Translation service <select id="provider"><option value="auto">Auto (API key or Claude login)</option><option value="claude">Claude CLI login</option><option value="anthropic">Anthropic API</option></select></label>
+    <label>Model (optional) <input id="model" placeholder="Default model" spellcheck="false"></label>
+    <span id="service-info">Checking available translation services…</span>
+    <span>Run translates code. Check executes both programs locally and compares their output. Use trusted code only.</span>
   </div>
 
   <div class="panes" id="panes">
@@ -72,6 +81,7 @@
       <div class="pane-bar">
         <span class="pane-label" id="label-out">output &middot; javascript</span>
         <button class="mini" id="copy" type="button">copy</button>
+        <button class="mini" id="download" type="button">download</button>
       </div>
       <pre id="out"><code class="placeholder">output appears here</code></pre>
     </div>
@@ -87,7 +97,7 @@
 
 <section class="tile viz" id="viz" hidden aria-label="Compiler pipeline visualization">
   <div class="tile-head viz-head">
-    <span class="viz-title">pipeline &middot; 6 stages</span>
+    <span class="viz-title">translation pipeline</span>
     <span class="spacer"></span>
     <button class="mini-ic" id="vizrefresh" type="button" title="Re-run on current code">
       <svg viewBox="0 0 16 16" aria-hidden="true">
