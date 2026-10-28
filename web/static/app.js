@@ -391,12 +391,8 @@ function showText(text, cls) {
   out.appendChild(code);
 }
 
-function holeSummary(records) {
-  if (!records || !records.length) return "no holes";
-  const via = records.some((r) => r.via === "live") ? "live LLM"
-            : records.some((r) => r.via === "mock") ? "offline mock" : "cache";
-  const n = records.length;
-  return n + " hole" + (n > 1 ? "s" : "") + " via " + via + ", gates A/B/C passed";
+function elapsed(ms) {
+  return ms >= 1000 ? (ms / 1000).toFixed(1) + " s" : ms + " ms";
 }
 
 async function run() {
@@ -407,9 +403,7 @@ async function run() {
     if (r.ok) {
       showText(r.code);
       lastTranslation = { source: src.value, sourceLang, target, code: r.code };
-      statusEl.textContent = TARGET_NAMES[sourceLang] + " → " + TARGET_NAMES[target] + " · " +
-        (r.engine === "compiler" ? "compiler" : r.engine === "identity" ? "same language" : "AI translation") + " · " +
-        (r.validation?.status === "passed" ? "compiler check passed" : "compiler unavailable; not checked");
+      statusEl.textContent = "Done";
       statusEl.className = "ok";
     } else {
       lastTranslation = null;
@@ -417,7 +411,7 @@ async function run() {
       statusEl.textContent = r.error.message;
       statusEl.className = "err";
     }
-    timingEl.textContent = (r.ms || 0) + " ms";
+    timingEl.textContent = elapsed(r.ms || 0);
   } catch (err) {
     setBusy(false, err.name === "AbortError" ? "translation timed out, please retry" : "server unreachable, is web/server.py running?");
     statusEl.className = "err";
@@ -458,7 +452,7 @@ async function check() {
       statusEl.textContent = r.error.message;
       statusEl.className = "err";
     }
-    timingEl.textContent = (r.ms || 0) + " ms";
+    timingEl.textContent = elapsed(r.ms || 0);
   } catch {
     setBusy(false, "server unreachable, is web/server.py running?");
     statusEl.className = "err";

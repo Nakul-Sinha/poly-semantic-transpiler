@@ -46,6 +46,11 @@ translation works even when a target toolchain is unavailable. Only standard-lib
 single-file programs are requested; framework/project migrations and arbitrary dependency
 installation are outside this mode's scope.
 
+Identical AI translations are reused from a bounded in-memory cache for ten minutes
+(128 entries). Changing the program, languages, provider, account key, or model creates
+a new request. The first request still includes model/network and CLI startup time;
+repeated requests avoid both model generation and redundant compiler checks.
+
 The web server is a **localhost development tool**. Check runs your code with time limits
 and removes credential-like environment variables, but is not a security sandbox.
 Use trusted programs and keep the server bound to localhost.

@@ -12,6 +12,13 @@ sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1]
 import server
 
 
+@pytest.fixture(autouse=True)
+def empty_translation_cache():
+    translation.clear_translation_cache()
+    yield
+    translation.clear_translation_cache()
+
+
 @pytest.mark.parametrize("src", LANGUAGES)
 @pytest.mark.parametrize("target", LANGUAGES)
 def test_all_100_language_pairs_route_through_api(src, target, monkeypatch):
@@ -137,3 +144,36 @@ def test_rich_python_identity_needs_no_translation_service(monkeypatch):
     source = "import math\na, b = 1, 2\nprint(math.sqrt(a + b))\n"
     result = server.api_transpile({"source": source, "source_lang": "py", "target": "py"})
     assert result["ok"] and result["code"] == source and result["engine"] == "identity"
+
+
+def test_repeated_translation_skips_model_and_compiler(monkeypatch):
+    calls = []
+    def ask(*args, **kwargs):
+        calls.append(1)
+        return "print(42)", "test"
+    monkeypatch.setattr(translation, "_ask", ask)
+    first = translation.translate("puts 42", "ruby", "py")
+    monkeypatch.setattr(translation, "check_code", lambda *a, **k: pytest.fail("cached code should not be recompiled"))
+    second = translation.translate("puts 42", "ruby", "py")
+    assert first["code"] == second["code"] and second["cached"] is True
+    assert len(calls) == 1
+    second["validation"]["status"] = "changed"
+    assert translation.translate("puts 42", "ruby", "py")["validation"]["status"] == "passed"
+
+
+def test_cache_expiry_and_model_changes_call_model_again(monkeypatch):
+    calls = []
+    monkeypatch.setattr(translation, "_ask", lambda *a, **k: (calls.append(1) or "print(42)", "test"))
+    translation.translate("puts 42", "ruby", "py", model="sonnet")
+    translation.translate("puts 42", "ruby", "py", model="haiku")
+    monkeypatch.setattr(translation, "_CACHE_TTL", 0)
+    translation.translate("puts 42", "ruby", "py", model="sonnet")
+    assert len(calls) == 3
+
+
+def test_cache_is_bounded(monkeypatch):
+    monkeypatch.setattr(translation, "_CACHE_LIMIT", 2)
+    monkeypatch.setattr(translation, "_ask", lambda *a, **k: ("print(42)", "test"))
+    for n in range(3):
+        translation.translate(f"puts {n}", "ruby", "py")
+    assert len(translation._CACHE) == 2
