@@ -38,6 +38,7 @@ from poly.semantic import analyze                 # noqa: E402
 from poly.languages import LANGUAGES, language    # noqa: E402
 from poly.translate import translate, provider_available  # noqa: E402
 from poly.validation import check_code            # noqa: E402
+from poly.demos import demo_catalog, prepared_translation  # noqa: E402
 
 STATIC = Path(__file__).resolve().parent / "static"
 MIME = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -150,6 +151,11 @@ def api_transpile(payload: dict) -> dict:
         engine = payload.get("engine", "auto")
         if engine not in ("auto", "compiler", "llm"):
             raise ValueError("Unknown translation engine.")
+        if engine == "auto":
+            prepared = prepared_translation(source, src_lang, target)
+            if prepared is not None:
+                return {"ok": True, "records": [], **prepared,
+                        "ms": round((time.perf_counter() - started) * 1000)}
         if src_lang == target and "source_lang" in payload and engine != "compiler":
             result = translate(source, src_lang, target, api_key=api_key, provider=provider,
                                model=str(payload.get("model") or "").strip())
@@ -429,6 +435,9 @@ class Handler(BaseHTTPRequestHandler):
     # ---- static files -----------------------------------------------------
     def do_GET(self):
         path = self.path.split("?", 1)[0]
+        if path == "/api/demos":
+            self._send(200, json.dumps({"demos": demo_catalog()}).encode(), "application/json")
+            return
         if path == "/api/languages":
             self._send(200, json.dumps({"languages": LANGUAGES,
                        "claude_cli": bool(__import__("shutil").which("claude")),

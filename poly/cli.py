@@ -120,15 +120,17 @@ def main(argv=None) -> int:
         return 2
 
     try:
-        if (args.ai or source_lang != "py" or args.target not in ("js", "py", "c")
+        from .demos import prepared_translation
+        prepared = prepared_translation(source, source_lang, args.target) if not (args.dump or args.self_check) else None
+        if (prepared or args.ai or source_lang != "py" or args.target not in ("js", "py", "c")
                 or (source_lang == args.target and not (args.dump or args.self_check))):
             from .translate import translate
             from .validation import check_code
-            if args.no_llm and source_lang != args.target:
+            if args.no_llm and source_lang != args.target and prepared is None:
                 raise ValueError("This language pair requires AI translation; remove --no-llm.")
             if args.dump:
                 raise ValueError("Stage dumps are available for the Python compiler. Use the web pipeline for AI translation.")
-            result = translate(source, source_lang, args.target, provider=args.provider, model=args.model)
+            result = prepared or translate(source, source_lang, args.target, provider=args.provider, model=args.model)
             code = result["code"]
             print(result["validation"]["detail"], file=sys.stderr)
             if args.self_check:

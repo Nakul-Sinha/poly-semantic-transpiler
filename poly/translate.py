@@ -21,6 +21,7 @@ import urllib.request
 
 from .languages import LANGUAGES, language
 from .validation import check_code
+from .demos import prepared_translation
 
 SYSTEM = """You are a source-to-source translator. Translate the supplied program faithfully.
 Return ONLY complete runnable target-language source, without markdown or explanations.
@@ -152,6 +153,9 @@ def translate(source, source_lang, target, *, api_key="", provider="auto", model
     if model and not re.fullmatch(r"[A-Za-z0-9_.:/-]{1,160}", model):
         raise ValueError("Invalid model name. Use a model ID or an alias such as sonnet.")
     provider_available(api_key, provider)  # validate provider, including identity translations
+    prepared = prepared_translation(source, source_lang, target)
+    if prepared is not None:
+        return prepared
     if source_lang == target:
         validation = check_code(source, target)
         if validation["status"] == "failed":

@@ -13,6 +13,8 @@ const EXTENSIONS = { py: ".py", js: ".js", c: ".c", cpp: ".cpp", java: ".java", 
 let target = "js";
 let sourceLang = "py";
 let examples = {};
+let demos = [];
+let activeDemo = "";
 let lastTranslation = null;
 let busy = false;
 const STORE_KEY = "poly.win.v2";
@@ -296,7 +298,11 @@ function setSource(v, restore = true) {
   const root = $("dd-source");
   root.querySelectorAll("li").forEach((li) => li.classList.toggle("on", li.dataset.value === v));
   root.querySelector(".dd-value").textContent = TARGET_NAMES[v];
-  if (restore) src.value = localStorage.getItem("poly.src." + v) ?? examples[v] ?? "";
+  if (restore) {
+    const demo = demos.find((d) => d.id === activeDemo);
+    src.value = demo?.code[v] ?? localStorage.getItem("poly.src." + v) ?? examples[v] ?? "";
+    if (demo) src.dispatchEvent(new Event("input"));
+  }
   lastTranslation = null;
   showText("output appears here", "placeholder");
   statusEl.textContent = "ready · " + TARGET_NAMES[v] + " → " + TARGET_NAMES[target];
@@ -322,6 +328,11 @@ function setTarget(v, fromUser) {
 
 src.value = localStorage.getItem("poly.src") || DEFAULT_SOURCE;
 src.addEventListener("input", () => {
+  const demo = demos.find((d) => d.id === activeDemo);
+  if (demo && src.value.replace(/\r\n/g, "\n").trim() !== demo.code[sourceLang].trim()) {
+    activeDemo = "";
+    $("demo").value = "";
+  }
   localStorage.setItem("poly.src." + sourceLang, src.value);
   if (sourceLang === "py") localStorage.setItem("poly.src", src.value);
 });
@@ -379,7 +390,7 @@ function setBusy(busy, msg) {
 
 function setControlsBusy(value) {
   busy = value;
-  for (const id of ["run", "check", "swap", "example", "provider", "model", "apikey", "vizrefresh", "vizbtn"]) $(id).disabled = value;
+  for (const id of ["run", "check", "swap", "example", "demo", "provider", "model", "apikey", "vizrefresh", "vizbtn"]) $(id).disabled = value;
   src.readOnly = value;
 }
 
@@ -486,6 +497,8 @@ $("settingsbtn").addEventListener("click", () => {
 });
 $("example").addEventListener("click", () => {
   if (examples[sourceLang]) {
+    activeDemo = "";
+    $("demo").value = "";
     src.value = examples[sourceLang];
     src.dispatchEvent(new Event("input"));
     lastTranslation = null;
@@ -517,3 +530,24 @@ fetch("/api/languages").then((r) => r.json()).then((data) => {
   const previous = localStorage.getItem("poly.sourceLang");
   if (previous && TARGET_NAMES[previous] && previous !== sourceLang) setSource(previous);
 }).catch(() => { $("service-info").textContent = "Cannot reach server. Start python web/server.py."; });
+
+fetch("/api/demos").then((r) => r.json()).then((data) => {
+  demos = data.demos;
+  for (const demo of demos) {
+    const option = document.createElement("option");
+    option.value = demo.id;
+    option.textContent = demo.title;
+    $("demo").appendChild(option);
+  }
+}).catch(() => { $("demo").disabled = true; });
+$("demo").addEventListener("change", () => {
+  const demo = demos.find((d) => d.id === $("demo").value);
+  activeDemo = demo?.id ?? "";
+  if (!demo) return;
+  src.value = demo.code[sourceLang];
+  src.dispatchEvent(new Event("input"));
+  lastTranslation = null;
+  showText("output appears here", "placeholder");
+  timingEl.textContent = "";
+  statusEl.textContent = demo.title + " loaded";
+});

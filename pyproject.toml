@@ -20,6 +20,9 @@ poly = "poly.cli:main"
 [tool.setuptools]
 packages = ["poly", "poly.codegen", "poly.llm"]
 
+[tool.setuptools.package-data]
+poly = ["demo_programs.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"

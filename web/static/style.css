@@ -146,6 +146,7 @@ body {
 
 .spacer { flex: 1; }
 .swap { background: transparent; border: 0; cursor: pointer; font-size: 23px; padding: 0 3px; }
+.demo-select { max-width: 185px; padding: 6px 8px; border: 1px solid var(--stroke); border-radius: 10px; font: 11px var(--sans); background: #f1f3f7; color: var(--ink); }
 .settings { display: flex; flex-wrap: wrap; gap: 10px 18px; padding: 12px 18px; background: rgba(245,247,252,.94); font-size: 11px; }
 .settings[hidden] { display: none; }
 .settings label { display: flex; align-items: center; gap: 8px; }

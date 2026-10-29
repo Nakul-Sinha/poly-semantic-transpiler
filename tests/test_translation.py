@@ -13,7 +13,9 @@ import server
 
 
 @pytest.fixture(autouse=True)
-def empty_translation_cache():
+def empty_translation_cache(monkeypatch):
+    # These tests exercise the general AI path, separately from prepared demos.
+    monkeypatch.setattr(translation, "prepared_translation", lambda *a: None)
     translation.clear_translation_cache()
     yield
     translation.clear_translation_cache()

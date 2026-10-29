@@ -3,6 +3,20 @@
 Translate between **Python, JavaScript, C, C++, Java, C#, Go, Rust, Ruby, and PHP**.
 Every language can be selected as input or output (100 combinations, including same-language passthrough).
 
+### Prepared demonstration programs
+
+The **Prepared demos** picker loads ten reference programs in any selected input language:
+factorial, Fibonacci, GCD, prime testing, array sum, array maximum, string reversal,
+palindrome testing, binary search, and bubble sort. Each includes a saved translation
+in all ten languages, so all 1,000 demo/program/language combinations work offline,
+without a model request, runtime compilation on Run, or a ten-minute cache expiry.
+The saved library is bundled with the app and survives restarts.
+
+This is an exact-match demonstration library, not a general translation engine.
+Changing the program (including the sample arguments) falls back to the regular path.
+Use **Check** to compile/run both programs with installed toolchains. The demonstration
+does not claim a compiler check has run when it has only returned a prepared example.
+
 The fastest way to start:
 
 ```bash

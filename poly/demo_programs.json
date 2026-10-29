@@ -1,0 +1,172 @@
+[
+  {
+    "id": "factorial",
+    "title": "Recursive factorial",
+    "expected": "120\n",
+    "code": {
+      "py": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))\n",
+      "js": "function factorial(n) {\n  if (n <= 1) {\n    return 1;\n  }\n  return n * factorial(n - 1);\n}\n\nconsole.log(factorial(5));\n",
+      "c": "#include <stdio.h>\n\nlong long factorial(int n) {\n    if (n <= 1) {\n        return 1;\n    }\n    return n * factorial(n - 1);\n}\n\nint main(void) {\n    printf(\"%lld\\n\", factorial(5));\n    return 0;\n}\n",
+      "java": "public class Factorial {\n    static long factorial(int n) {\n        if (n <= 1) {\n            return 1;\n        }\n        return n * factorial(n - 1);\n    }\n\n    public static void main(String[] args) {\n        System.out.print(factorial(5) + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n\nlong long factorial(long long n) {\n    if (n <= 1) {\n        return 1;\n    }\n    return n * factorial(n - 1);\n}\n\nint main() {\n    std::cout << factorial(5) << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc factorial(n int) int {\n\tif n <= 1 {\n\t\treturn 1\n\t}\n\treturn n * factorial(n-1)\n}\n\nfunc main() {\n\tfmt.Println(factorial(5))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static long Factorial(long n)\n    {\n        if (n <= 1)\n            return 1;\n        return n * Factorial(n - 1);\n    }\n\n    static void Main()\n    {\n        Console.Write(Factorial(5) + \"\\n\");\n    }\n}\n",
+      "ruby": "def factorial(n)\n  return 1 if n <= 1\n  n * factorial(n - 1)\nend\n\nputs factorial(5)\n",
+      "rust": "fn factorial(n: u64) -> u64 {\n    if n <= 1 {\n        return 1;\n    }\n    n * factorial(n - 1)\n}\n\nfn main() {\n    println!(\"{}\", factorial(5));\n}\n",
+      "php": "<?php\nfunction factorial($n) {\n    if ($n <= 1) {\n        return 1;\n    }\n    return $n * factorial($n - 1);\n}\n\necho factorial(5) . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "fibonacci",
+    "title": "Fibonacci sequence",
+    "expected": "55\n",
+    "code": {
+      "py": "def fibonacci(n):\n    a, b = 0, 1\n    for i in range(n):\n        a, b = b, a + b\n    return a\n\nprint(fibonacci(10))\n",
+      "js": "function fibonacci(n) {\n  let a = 0;\n  let b = 1;\n  for (let i = 0; i < n; i++) {\n    [a, b] = [b, a + b];\n  }\n  return a;\n}\n\nconsole.log(fibonacci(10));\n",
+      "c": "#include <stdio.h>\n\nlong long fibonacci(int n) {\n    long long a = 0;\n    long long b = 1;\n    for (int i = 0; i < n; i++) {\n        long long next = a + b;\n        a = b;\n        b = next;\n    }\n    return a;\n}\n\nint main(void) {\n    printf(\"%lld\\n\", fibonacci(10));\n    return 0;\n}\n",
+      "java": "public class Fibonacci {\n    static long fibonacci(int n) {\n        long a = 0, b = 1;\n        for (int i = 0; i < n; i++) {\n            long next = a + b;\n            a = b;\n            b = next;\n        }\n        return a;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(fibonacci(10) + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n\nlong long fibonacci(int n) {\n    long long a = 0, b = 1;\n    for (int i = 0; i < n; ++i) {\n        long long next = a + b;\n        a = b;\n        b = next;\n    }\n    return a;\n}\n\nint main() {\n    std::cout << fibonacci(10) << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc fibonacci(n int) int {\n\ta, b := 0, 1\n\tfor i := 0; i < n; i++ {\n\t\ta, b = b, a+b\n\t}\n\treturn a\n}\n\nfunc main() {\n\tfmt.Println(fibonacci(10))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static long Fibonacci(int n)\n    {\n        long a = 0, b = 1;\n        for (int i = 0; i < n; i++)\n        {\n            long next = a + b;\n            a = b;\n            b = next;\n        }\n        return a;\n    }\n\n    static void Main()\n    {\n        Console.Write(Fibonacci(10) + \"\\n\");\n    }\n}\n",
+      "ruby": "def fibonacci(n)\n  a, b = 0, 1\n  n.times do\n    a, b = b, a + b\n  end\n  a\nend\n\nputs fibonacci(10)\n",
+      "rust": "fn fibonacci(n: u32) -> u64 {\n    let (mut a, mut b): (u64, u64) = (0, 1);\n    for _ in 0..n {\n        let next = a + b;\n        a = b;\n        b = next;\n    }\n    a\n}\n\nfn main() {\n    println!(\"{}\", fibonacci(10));\n}\n",
+      "php": "<?php\nfunction fibonacci($n) {\n    $a = 0;\n    $b = 1;\n    for ($i = 0; $i < $n; $i++) {\n        [$a, $b] = [$b, $a + $b];\n    }\n    return $a;\n}\n\necho fibonacci(10) . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "gcd",
+    "title": "Greatest common divisor",
+    "expected": "12\n",
+    "code": {
+      "py": "def gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n\nprint(gcd(48, 36))\n",
+      "js": "function gcd(a, b) {\n  while (b !== 0) {\n    [a, b] = [b, a % b];\n  }\n  return a;\n}\n\nconsole.log(gcd(48, 36));\n",
+      "c": "#include <stdio.h>\n\nint gcd(int a, int b) {\n    while (b != 0) {\n        int remainder = a % b;\n        a = b;\n        b = remainder;\n    }\n    return a;\n}\n\nint main(void) {\n    printf(\"%d\\n\", gcd(48, 36));\n    return 0;\n}\n",
+      "java": "public class Gcd {\n    static int gcd(int a, int b) {\n        while (b != 0) {\n            int temp = a % b;\n            a = b;\n            b = temp;\n        }\n        return a;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(gcd(48, 36) + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n\nlong long gcd(long long a, long long b) {\n    while (b != 0) {\n        long long remainder = a % b;\n        a = b;\n        b = remainder;\n    }\n    return a;\n}\n\nint main() {\n    std::cout << gcd(48, 36) << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc gcd(a, b int) int {\n\tfor b != 0 {\n\t\ta, b = b, a%b\n\t}\n\treturn a\n}\n\nfunc main() {\n\tfmt.Println(gcd(48, 36))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static int Gcd(int a, int b)\n    {\n        while (b != 0)\n        {\n            int temp = a % b;\n            a = b;\n            b = temp;\n        }\n        return a;\n    }\n\n    static void Main()\n    {\n        Console.Write(Gcd(48, 36) + \"\\n\");\n    }\n}\n",
+      "ruby": "def gcd(a, b)\n  while b != 0\n    a, b = b, a % b\n  end\n  a\nend\n\nputs gcd(48, 36)\n",
+      "rust": "fn gcd(mut a: i64, mut b: i64) -> i64 {\n    while b != 0 {\n        let remainder = a % b;\n        a = b;\n        b = remainder;\n    }\n    a\n}\n\nfn main() {\n    println!(\"{}\", gcd(48, 36));\n}\n",
+      "php": "<?php\nfunction gcd($a, $b) {\n    while ($b != 0) {\n        [$a, $b] = [$b, $a % $b];\n    }\n    return $a;\n}\n\necho gcd(48, 36) . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "prime",
+    "title": "Prime number test",
+    "expected": "1\n",
+    "code": {
+      "py": "def is_prime(n):\n    if n < 2:\n        return 0\n    i = 2\n    while i * i <= n:\n        if n % i == 0:\n            return 0\n        i += 1\n    return 1\n\nprint(is_prime(29))\n",
+      "js": "function isPrime(n) {\n  if (n < 2) {\n    return 0;\n  }\n  let i = 2;\n  while (i * i <= n) {\n    if (n % i === 0) {\n      return 0;\n    }\n    i += 1;\n  }\n  return 1;\n}\n\nconsole.log(isPrime(29));\n",
+      "c": "#include <stdio.h>\n\nint is_prime(int n) {\n    if (n < 2) {\n        return 0;\n    }\n    int i = 2;\n    while (i * i <= n) {\n        if (n % i == 0) {\n            return 0;\n        }\n        i += 1;\n    }\n    return 1;\n}\n\nint main(void) {\n    printf(\"%d\\n\", is_prime(29));\n    return 0;\n}\n",
+      "java": "public class Prime {\n    static int isPrime(int n) {\n        if (n < 2) {\n            return 0;\n        }\n        int i = 2;\n        while ((long) i * i <= n) {\n            if (n % i == 0) {\n                return 0;\n            }\n            i++;\n        }\n        return 1;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(isPrime(29) + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n\nint is_prime(long long n) {\n    if (n < 2) {\n        return 0;\n    }\n    long long i = 2;\n    while (i * i <= n) {\n        if (n % i == 0) {\n            return 0;\n        }\n        i += 1;\n    }\n    return 1;\n}\n\nint main() {\n    std::cout << is_prime(29) << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc isPrime(n int) int {\n\tif n < 2 {\n\t\treturn 0\n\t}\n\ti := 2\n\tfor i*i <= n {\n\t\tif n%i == 0 {\n\t\t\treturn 0\n\t\t}\n\t\ti++\n\t}\n\treturn 1\n}\n\nfunc main() {\n\tfmt.Println(isPrime(29))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static int IsPrime(int n)\n    {\n        if (n < 2)\n            return 0;\n        int i = 2;\n        while (i * i <= n)\n        {\n            if (n % i == 0)\n                return 0;\n            i += 1;\n        }\n        return 1;\n    }\n\n    static void Main()\n    {\n        Console.Write(IsPrime(29) + \"\\n\");\n    }\n}\n",
+      "ruby": "def is_prime(n)\n  return 0 if n < 2\n  i = 2\n  while i * i <= n\n    return 0 if n % i == 0\n    i += 1\n  end\n  1\nend\n\nputs is_prime(29)\n",
+      "rust": "fn is_prime(n: i64) -> i32 {\n    if n < 2 {\n        return 0;\n    }\n    let mut i: i64 = 2;\n    while i * i <= n {\n        if n % i == 0 {\n            return 0;\n        }\n        i += 1;\n    }\n    1\n}\n\nfn main() {\n    println!(\"{}\", is_prime(29));\n}\n",
+      "php": "<?php\nfunction is_prime($n) {\n    if ($n < 2) {\n        return 0;\n    }\n    $i = 2;\n    while ($i * $i <= $n) {\n        if ($n % $i == 0) {\n            return 0;\n        }\n        $i += 1;\n    }\n    return 1;\n}\n\necho is_prime(29) . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "sum_array",
+    "title": "Sum of an array",
+    "expected": "15\n",
+    "code": {
+      "py": "def sum_array(numbers):\n    total = 0\n    for number in numbers:\n        total += number\n    return total\n\nprint(sum_array([1, 2, 3, 4, 5]))\n",
+      "js": "function sumArray(numbers) {\n  let total = 0;\n  for (const number of numbers) {\n    total += number;\n  }\n  return total;\n}\n\nconsole.log(sumArray([1, 2, 3, 4, 5]));\n",
+      "c": "#include <stdio.h>\n#include <stddef.h>\n\nint sum_array(const int *numbers, size_t count) {\n    int total = 0;\n    for (size_t i = 0; i < count; i++) {\n        total += numbers[i];\n    }\n    return total;\n}\n\nint main(void) {\n    int numbers[] = {1, 2, 3, 4, 5};\n    size_t count = sizeof(numbers) / sizeof(numbers[0]);\n    printf(\"%d\\n\", sum_array(numbers, count));\n    return 0;\n}\n",
+      "java": "public class SumArray {\n    static int sumArray(int[] numbers) {\n        int total = 0;\n        for (int number : numbers) {\n            total += number;\n        }\n        return total;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(sumArray(new int[]{1, 2, 3, 4, 5}) + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n#include <vector>\n\nlong long sum_array(const std::vector<long long>& numbers) {\n    long long total = 0;\n    for (long long number : numbers) {\n        total += number;\n    }\n    return total;\n}\n\nint main() {\n    std::cout << sum_array({1, 2, 3, 4, 5}) << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc sumArray(numbers []int) int {\n\ttotal := 0\n\tfor _, number := range numbers {\n\t\ttotal += number\n\t}\n\treturn total\n}\n\nfunc main() {\n\tfmt.Println(sumArray([]int{1, 2, 3, 4, 5}))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static int SumArray(int[] numbers)\n    {\n        int total = 0;\n        foreach (int number in numbers)\n            total += number;\n        return total;\n    }\n\n    static void Main()\n    {\n        Console.Write(SumArray(new int[] { 1, 2, 3, 4, 5 }) + \"\\n\");\n    }\n}\n",
+      "ruby": "def sum_array(numbers)\n  total = 0\n  numbers.each do |number|\n    total += number\n  end\n  total\nend\n\nputs sum_array([1, 2, 3, 4, 5])\n",
+      "rust": "fn sum_array(numbers: &[i64]) -> i64 {\n    let mut total: i64 = 0;\n    for &number in numbers {\n        total += number;\n    }\n    total\n}\n\nfn main() {\n    println!(\"{}\", sum_array(&[1, 2, 3, 4, 5]));\n}\n",
+      "php": "<?php\nfunction sum_array($numbers) {\n    $total = 0;\n    foreach ($numbers as $number) {\n        $total += $number;\n    }\n    return $total;\n}\n\necho sum_array([1, 2, 3, 4, 5]) . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "maximum",
+    "title": "Largest array element",
+    "expected": "9\n",
+    "code": {
+      "py": "def maximum(numbers):\n    largest = numbers[0]\n    for number in numbers:\n        if number > largest:\n            largest = number\n    return largest\n\nprint(maximum([3, 9, 2, 7, 1]))\n",
+      "js": "function maximum(numbers) {\n  let largest = numbers[0];\n  for (const number of numbers) {\n    if (number > largest) {\n      largest = number;\n    }\n  }\n  return largest;\n}\n\nconsole.log(maximum([3, 9, 2, 7, 1]));\n",
+      "c": "#include <stdio.h>\n#include <stddef.h>\n\nint maximum(const int *numbers, size_t count) {\n    int largest = numbers[0];\n    for (size_t i = 0; i < count; i++) {\n        if (numbers[i] > largest) {\n            largest = numbers[i];\n        }\n    }\n    return largest;\n}\n\nint main(void) {\n    int numbers[] = {3, 9, 2, 7, 1};\n    size_t count = sizeof(numbers) / sizeof(numbers[0]);\n    printf(\"%d\\n\", maximum(numbers, count));\n    return 0;\n}\n",
+      "java": "public class Maximum {\n    static int maximum(int[] numbers) {\n        int largest = numbers[0];\n        for (int number : numbers) {\n            if (number > largest) {\n                largest = number;\n            }\n        }\n        return largest;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(maximum(new int[]{3, 9, 2, 7, 1}) + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n#include <vector>\n\nlong long maximum(const std::vector<long long>& numbers) {\n    long long largest = numbers[0];\n    for (long long number : numbers) {\n        if (number > largest) {\n            largest = number;\n        }\n    }\n    return largest;\n}\n\nint main() {\n    std::cout << maximum({3, 9, 2, 7, 1}) << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc maximum(numbers []int) int {\n\tlargest := numbers[0]\n\tfor _, number := range numbers {\n\t\tif number > largest {\n\t\t\tlargest = number\n\t\t}\n\t}\n\treturn largest\n}\n\nfunc main() {\n\tfmt.Println(maximum([]int{3, 9, 2, 7, 1}))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static int Maximum(int[] numbers)\n    {\n        int largest = numbers[0];\n        foreach (int number in numbers)\n        {\n            if (number > largest)\n                largest = number;\n        }\n        return largest;\n    }\n\n    static void Main()\n    {\n        Console.Write(Maximum(new int[] { 3, 9, 2, 7, 1 }) + \"\\n\");\n    }\n}\n",
+      "ruby": "def maximum(numbers)\n  largest = numbers[0]\n  numbers.each do |number|\n    largest = number if number > largest\n  end\n  largest\nend\n\nputs maximum([3, 9, 2, 7, 1])\n",
+      "rust": "fn maximum(numbers: &[i64]) -> i64 {\n    let mut largest = numbers[0];\n    for &number in numbers {\n        if number > largest {\n            largest = number;\n        }\n    }\n    largest\n}\n\nfn main() {\n    println!(\"{}\", maximum(&[3, 9, 2, 7, 1]));\n}\n",
+      "php": "<?php\nfunction maximum($numbers) {\n    $largest = $numbers[0];\n    foreach ($numbers as $number) {\n        if ($number > $largest) {\n            $largest = $number;\n        }\n    }\n    return $largest;\n}\n\necho maximum([3, 9, 2, 7, 1]) . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "reverse_string",
+    "title": "Reverse a string",
+    "expected": "ylop\n",
+    "code": {
+      "py": "def reverse_string(text):\n    result = \"\"\n    for character in text:\n        result = character + result\n    return result\n\nprint(reverse_string(\"poly\"))\n",
+      "js": "function reverseString(text) {\n  let result = \"\";\n  for (const character of text) {\n    result = character + result;\n  }\n  return result;\n}\n\nconsole.log(reverseString(\"poly\"));\n",
+      "c": "#include <stdio.h>\n#include <string.h>\n\nvoid reverse_string(const char *text, char *result) {\n    size_t length = strlen(text);\n    for (size_t i = 0; i < length; i++) {\n        result[i] = text[length - 1 - i];\n    }\n    result[length] = '\\0';\n}\n\nint main(void) {\n    const char *text = \"poly\";\n    char result[64];\n    reverse_string(text, result);\n    printf(\"%s\\n\", result);\n    return 0;\n}\n",
+      "java": "public class ReverseString {\n    static String reverseString(String text) {\n        String result = \"\";\n        for (char character : text.toCharArray()) {\n            result = character + result;\n        }\n        return result;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(reverseString(\"poly\") + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n#include <string>\n\nstd::string reverse_string(const std::string& text) {\n    std::string result = \"\";\n    for (char character : text) {\n        result = character + result;\n    }\n    return result;\n}\n\nint main() {\n    std::cout << reverse_string(\"poly\") << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc reverseString(text string) string {\n\tresult := \"\"\n\tfor _, character := range text {\n\t\tresult = string(character) + result\n\t}\n\treturn result\n}\n\nfunc main() {\n\tfmt.Println(reverseString(\"poly\"))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static string ReverseString(string text)\n    {\n        string result = \"\";\n        foreach (char character in text)\n            result = character + result;\n        return result;\n    }\n\n    static void Main()\n    {\n        Console.Write(ReverseString(\"poly\") + \"\\n\");\n    }\n}\n",
+      "ruby": "def reverse_string(text)\n  result = \"\"\n  text.each_char do |character|\n    result = character + result\n  end\n  result\nend\n\nputs reverse_string(\"poly\")\n",
+      "rust": "fn reverse_string(text: &str) -> String {\n    // Python iterates over code points; `chars()` does the same in Rust.\n    text.chars().rev().collect()\n}\n\nfn main() {\n    println!(\"{}\", reverse_string(\"poly\"));\n}\n",
+      "php": "<?php\nfunction reverse_string($text) {\n    $result = \"\";\n    $length = strlen($text);\n    for ($i = 0; $i < $length; $i++) {\n        $result = $text[$i] . $result;\n    }\n    return $result;\n}\n\necho reverse_string(\"poly\") . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "palindrome",
+    "title": "Palindrome test",
+    "expected": "1\n",
+    "code": {
+      "py": "def is_palindrome(text):\n    left, right = 0, len(text) - 1\n    while left < right:\n        if text[left] != text[right]:\n            return 0\n        left += 1\n        right -= 1\n    return 1\n\nprint(is_palindrome(\"level\"))\n",
+      "js": "function isPalindrome(text) {\n  let left = 0;\n  let right = text.length - 1;\n  while (left < right) {\n    if (text[left] !== text[right]) {\n      return 0;\n    }\n    left += 1;\n    right -= 1;\n  }\n  return 1;\n}\n\nconsole.log(isPalindrome(\"level\"));\n",
+      "c": "#include <stdio.h>\n#include <string.h>\n\nint is_palindrome(const char *text) {\n    int left = 0;\n    int right = (int)strlen(text) - 1;\n    while (left < right) {\n        if (text[left] != text[right]) {\n            return 0;\n        }\n        left += 1;\n        right -= 1;\n    }\n    return 1;\n}\n\nint main(void) {\n    printf(\"%d\\n\", is_palindrome(\"level\"));\n    return 0;\n}\n",
+      "java": "public class Palindrome {\n    static int isPalindrome(String text) {\n        int left = 0, right = text.length() - 1;\n        while (left < right) {\n            if (text.charAt(left) != text.charAt(right)) {\n                return 0;\n            }\n            left++;\n            right--;\n        }\n        return 1;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(isPalindrome(\"level\") + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n#include <string>\n\nint is_palindrome(const std::string& text) {\n    long long left = 0;\n    long long right = static_cast<long long>(text.size()) - 1;\n    while (left < right) {\n        if (text[left] != text[right]) {\n            return 0;\n        }\n        left += 1;\n        right -= 1;\n    }\n    return 1;\n}\n\nint main() {\n    std::cout << is_palindrome(\"level\") << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc isPalindrome(text string) int {\n\tchars := []rune(text)\n\tleft, right := 0, len(chars)-1\n\tfor left < right {\n\t\tif chars[left] != chars[right] {\n\t\t\treturn 0\n\t\t}\n\t\tleft++\n\t\tright--\n\t}\n\treturn 1\n}\n\nfunc main() {\n\tfmt.Println(isPalindrome(\"level\"))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static int IsPalindrome(string text)\n    {\n        int left = 0, right = text.Length - 1;\n        while (left < right)\n        {\n            if (text[left] != text[right])\n                return 0;\n            left += 1;\n            right -= 1;\n        }\n        return 1;\n    }\n\n    static void Main()\n    {\n        Console.Write(IsPalindrome(\"level\") + \"\\n\");\n    }\n}\n",
+      "ruby": "def is_palindrome(text)\n  left, right = 0, text.length - 1\n  while left < right\n    return 0 if text[left] != text[right]\n    left += 1\n    right -= 1\n  end\n  1\nend\n\nputs is_palindrome(\"level\")\n",
+      "rust": "fn is_palindrome(text: &str) -> i32 {\n    let chars: Vec<char> = text.chars().collect();\n    // Signed indices avoid underflow when the string is empty (len - 1 == -1).\n    let mut left: isize = 0;\n    let mut right: isize = chars.len() as isize - 1;\n    while left < right {\n        if chars[left as usize] != chars[right as usize] {\n            return 0;\n        }\n        left += 1;\n        right -= 1;\n    }\n    1\n}\n\nfn main() {\n    println!(\"{}\", is_palindrome(\"level\"));\n}\n",
+      "php": "<?php\nfunction is_palindrome($text) {\n    $left = 0;\n    $right = strlen($text) - 1;\n    while ($left < $right) {\n        if ($text[$left] !== $text[$right]) {\n            return 0;\n        }\n        $left += 1;\n        $right -= 1;\n    }\n    return 1;\n}\n\necho is_palindrome(\"level\") . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "binary_search",
+    "title": "Binary search",
+    "expected": "3\n",
+    "code": {
+      "py": "def binary_search(numbers, target):\n    left, right = 0, len(numbers) - 1\n    while left <= right:\n        middle = (left + right) // 2\n        if numbers[middle] == target:\n            return middle\n        if numbers[middle] < target:\n            left = middle + 1\n        else:\n            right = middle - 1\n    return -1\n\nprint(binary_search([1, 3, 5, 7, 9], 7))\n",
+      "js": "function binarySearch(numbers, target) {\n  let left = 0;\n  let right = numbers.length - 1;\n  while (left <= right) {\n    const middle = Math.floor((left + right) / 2);\n    if (numbers[middle] === target) {\n      return middle;\n    }\n    if (numbers[middle] < target) {\n      left = middle + 1;\n    } else {\n      right = middle - 1;\n    }\n  }\n  return -1;\n}\n\nconsole.log(binarySearch([1, 3, 5, 7, 9], 7));\n",
+      "c": "#include <stdio.h>\n\nint binary_search(const int *numbers, int count, int target) {\n    int left = 0;\n    int right = count - 1;\n    while (left <= right) {\n        int middle = left + (right - left) / 2;\n        if (numbers[middle] == target) {\n            return middle;\n        }\n        if (numbers[middle] < target) {\n            left = middle + 1;\n        } else {\n            right = middle - 1;\n        }\n    }\n    return -1;\n}\n\nint main(void) {\n    int numbers[] = {1, 3, 5, 7, 9};\n    int count = (int)(sizeof(numbers) / sizeof(numbers[0]));\n    printf(\"%d\\n\", binary_search(numbers, count, 7));\n    return 0;\n}\n",
+      "java": "public class BinarySearch {\n    static int binarySearch(int[] numbers, int target) {\n        int left = 0, right = numbers.length - 1;\n        while (left <= right) {\n            int middle = (left + right) / 2;\n            if (numbers[middle] == target) {\n                return middle;\n            }\n            if (numbers[middle] < target) {\n                left = middle + 1;\n            } else {\n                right = middle - 1;\n            }\n        }\n        return -1;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(binarySearch(new int[]{1, 3, 5, 7, 9}, 7) + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n#include <vector>\n\nlong long binary_search(const std::vector<long long>& numbers, long long target) {\n    long long left = 0;\n    long long right = static_cast<long long>(numbers.size()) - 1;\n    while (left <= right) {\n        long long middle = (left + right) / 2;\n        if (numbers[middle] == target) {\n            return middle;\n        }\n        if (numbers[middle] < target) {\n            left = middle + 1;\n        } else {\n            right = middle - 1;\n        }\n    }\n    return -1;\n}\n\nint main() {\n    std::cout << binary_search({1, 3, 5, 7, 9}, 7) << \"\\n\";\n    return 0;\n}\n",
+      "go": "package main\n\nimport \"fmt\"\n\nfunc binarySearch(numbers []int, target int) int {\n\tleft, right := 0, len(numbers)-1\n\tfor left <= right {\n\t\tmiddle := (left + right) / 2\n\t\tif numbers[middle] == target {\n\t\t\treturn middle\n\t\t}\n\t\tif numbers[middle] < target {\n\t\t\tleft = middle + 1\n\t\t} else {\n\t\t\tright = middle - 1\n\t\t}\n\t}\n\treturn -1\n}\n\nfunc main() {\n\tfmt.Println(binarySearch([]int{1, 3, 5, 7, 9}, 7))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static int BinarySearch(int[] numbers, int target)\n    {\n        int left = 0, right = numbers.Length - 1;\n        while (left <= right)\n        {\n            int middle = (left + right) / 2;\n            if (numbers[middle] == target)\n                return middle;\n            if (numbers[middle] < target)\n                left = middle + 1;\n            else\n                right = middle - 1;\n        }\n        return -1;\n    }\n\n    static void Main()\n    {\n        Console.Write(BinarySearch(new int[] { 1, 3, 5, 7, 9 }, 7) + \"\\n\");\n    }\n}\n",
+      "ruby": "def binary_search(numbers, target)\n  left, right = 0, numbers.length - 1\n  while left <= right\n    middle = (left + right) / 2\n    return middle if numbers[middle] == target\n    if numbers[middle] < target\n      left = middle + 1\n    else\n      right = middle - 1\n    end\n  end\n  -1\nend\n\nputs binary_search([1, 3, 5, 7, 9], 7)\n",
+      "rust": "fn binary_search(numbers: &[i64], target: i64) -> i64 {\n    let mut left: i64 = 0;\n    let mut right: i64 = numbers.len() as i64 - 1;\n    while left <= right {\n        let middle = (left + right) / 2;\n        let value = numbers[middle as usize];\n        if value == target {\n            return middle;\n        }\n        if value < target {\n            left = middle + 1;\n        } else {\n            right = middle - 1;\n        }\n    }\n    -1\n}\n\nfn main() {\n    println!(\"{}\", binary_search(&[1, 3, 5, 7, 9], 7));\n}\n",
+      "php": "<?php\nfunction binary_search($numbers, $target) {\n    $left = 0;\n    $right = count($numbers) - 1;\n    while ($left <= $right) {\n        $middle = intdiv($left + $right, 2);\n        if ($numbers[$middle] == $target) {\n            return $middle;\n        }\n        if ($numbers[$middle] < $target) {\n            $left = $middle + 1;\n        } else {\n            $right = $middle - 1;\n        }\n    }\n    return -1;\n}\n\necho binary_search([1, 3, 5, 7, 9], 7) . \"\\n\";\n"
+    }
+  },
+  {
+    "id": "bubble_sort",
+    "title": "Bubble sort",
+    "expected": "[1, 2, 4, 5, 8]\n",
+    "code": {
+      "py": "def bubble_sort(numbers):\n    numbers = numbers[:]\n    for i in range(len(numbers)):\n        for j in range(len(numbers) - i - 1):\n            if numbers[j] > numbers[j + 1]:\n                numbers[j], numbers[j + 1] = numbers[j + 1], numbers[j]\n    return numbers\n\nprint(bubble_sort([5, 1, 4, 2, 8]))\n",
+      "js": "function bubbleSort(input) {\n  const numbers = input.slice();\n  for (let i = 0; i < numbers.length; i++) {\n    for (let j = 0; j < numbers.length - i - 1; j++) {\n      if (numbers[j] > numbers[j + 1]) {\n        [numbers[j], numbers[j + 1]] = [numbers[j + 1], numbers[j]];\n      }\n    }\n  }\n  return numbers;\n}\n\nconsole.log(\"[\" + bubbleSort([5, 1, 4, 2, 8]).join(\", \") + \"]\");\n",
+      "c": "#include <stdio.h>\n#include <stddef.h>\n\nvoid bubble_sort(const int *input, int *output, size_t count) {\n    for (size_t i = 0; i < count; i++) {\n        output[i] = input[i];\n    }\n    for (size_t i = 0; i < count; i++) {\n        for (size_t j = 0; j + i + 1 < count; j++) {\n            if (output[j] > output[j + 1]) {\n                int temp = output[j];\n                output[j] = output[j + 1];\n                output[j + 1] = temp;\n            }\n        }\n    }\n}\n\nvoid print_array(const int *numbers, size_t count) {\n    printf(\"[\");\n    for (size_t i = 0; i < count; i++) {\n        if (i > 0) {\n            printf(\", \");\n        }\n        printf(\"%d\", numbers[i]);\n    }\n    printf(\"]\\n\");\n}\n\nint main(void) {\n    int numbers[] = {5, 1, 4, 2, 8};\n    size_t count = sizeof(numbers) / sizeof(numbers[0]);\n    int sorted[sizeof(numbers) / sizeof(numbers[0])];\n    bubble_sort(numbers, sorted, count);\n    print_array(sorted, count);\n    return 0;\n}\n",
+      "java": "import java.util.Arrays;\n\npublic class BubbleSort {\n    static int[] bubbleSort(int[] input) {\n        int[] numbers = Arrays.copyOf(input, input.length);\n        for (int i = 0; i < numbers.length; i++) {\n            for (int j = 0; j < numbers.length - i - 1; j++) {\n                if (numbers[j] > numbers[j + 1]) {\n                    int temp = numbers[j];\n                    numbers[j] = numbers[j + 1];\n                    numbers[j + 1] = temp;\n                }\n            }\n        }\n        return numbers;\n    }\n\n    public static void main(String[] args) {\n        System.out.print(Arrays.toString(bubbleSort(new int[]{5, 1, 4, 2, 8})) + \"\\n\");\n    }\n}\n",
+      "cpp": "#include <iostream>\n#include <utility>\n#include <vector>\n\nstd::vector<long long> bubble_sort(std::vector<long long> numbers) {  // by value = copy, like numbers[:]\n    std::size_t n = numbers.size();\n    for (std::size_t i = 0; i < n; ++i) {\n        for (std::size_t j = 0; j + 1 < n - i; ++j) {\n            if (numbers[j] > numbers[j + 1]) {\n                std::swap(numbers[j], numbers[j + 1]);\n            }\n        }\n    }\n    return numbers;\n}\n\nvoid print_list(const std::vector<long long>& numbers) {\n    std::cout << \"[\";\n    for (std::size_t k = 0; k < numbers.size(); ++k) {\n        if (k > 0) {\n            std::cout << \", \";\n        }\n        std::cout << numbers[k];\n    }\n    std::cout << \"]\\n\";\n}\n\nint main() {\n    print_list(bubble_sort({5, 1, 4, 2, 8}));\n    return 0;\n}\n",
+      "go": "package main\n\nimport (\n\t\"fmt\"\n\t\"strconv\"\n\t\"strings\"\n)\n\nfunc bubbleSort(input []int) []int {\n\tnumbers := make([]int, len(input))\n\tcopy(numbers, input)\n\tfor i := 0; i < len(numbers); i++ {\n\t\tfor j := 0; j < len(numbers)-i-1; j++ {\n\t\t\tif numbers[j] > numbers[j+1] {\n\t\t\t\tnumbers[j], numbers[j+1] = numbers[j+1], numbers[j]\n\t\t\t}\n\t\t}\n\t}\n\treturn numbers\n}\n\n// formatList mimics Python's list repr: [1, 2, 3]\nfunc formatList(numbers []int) string {\n\tparts := make([]string, len(numbers))\n\tfor i, n := range numbers {\n\t\tparts[i] = strconv.Itoa(n)\n\t}\n\treturn \"[\" + strings.Join(parts, \", \") + \"]\"\n}\n\nfunc main() {\n\tfmt.Println(formatList(bubbleSort([]int{5, 1, 4, 2, 8})))\n}\n",
+      "cs": "using System;\n\nclass Program\n{\n    static int[] BubbleSort(int[] input)\n    {\n        int[] numbers = (int[])input.Clone();\n        for (int i = 0; i < numbers.Length; i++)\n        {\n            for (int j = 0; j < numbers.Length - i - 1; j++)\n            {\n                if (numbers[j] > numbers[j + 1])\n                {\n                    int temp = numbers[j];\n                    numbers[j] = numbers[j + 1];\n                    numbers[j + 1] = temp;\n                }\n            }\n        }\n        return numbers;\n    }\n\n    static void Main()\n    {\n        int[] sorted = BubbleSort(new int[] { 5, 1, 4, 2, 8 });\n        Console.Write(\"[\" + string.Join(\", \", sorted) + \"]\\n\");\n    }\n}\n",
+      "ruby": "def bubble_sort(numbers)\n  numbers = numbers.dup\n  numbers.length.times do |i|\n    (numbers.length - i - 1).times do |j|\n      if numbers[j] > numbers[j + 1]\n        numbers[j], numbers[j + 1] = numbers[j + 1], numbers[j]\n      end\n    end\n  end\n  numbers\nend\n\np bubble_sort([5, 1, 4, 2, 8])\n",
+      "rust": "fn bubble_sort(numbers: &[i64]) -> Vec<i64> {\n    let mut numbers = numbers.to_vec();\n    let n = numbers.len();\n    for i in 0..n {\n        for j in 0..(n - i - 1) {\n            if numbers[j] > numbers[j + 1] {\n                numbers.swap(j, j + 1);\n            }\n        }\n    }\n    numbers\n}\n\nfn main() {\n    // `{:?}` on a Vec prints \"[1, 2, 4, 5, 8]\", the same as Python's list repr.\n    println!(\"{:?}\", bubble_sort(&[5, 1, 4, 2, 8]));\n}\n",
+      "php": "<?php\nfunction bubble_sort($numbers) {\n    // PHP passes arrays by value, so this already works on a copy (like numbers[:]).\n    $n = count($numbers);\n    for ($i = 0; $i < $n; $i++) {\n        for ($j = 0; $j < $n - $i - 1; $j++) {\n            if ($numbers[$j] > $numbers[$j + 1]) {\n                [$numbers[$j], $numbers[$j + 1]] = [$numbers[$j + 1], $numbers[$j]];\n            }\n        }\n    }\n    return $numbers;\n}\n\necho \"[\" . implode(\", \", bubble_sort([5, 1, 4, 2, 8])) . \"]\\n\";\n"
+    }
+  }
+]
